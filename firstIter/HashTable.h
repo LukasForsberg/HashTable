@@ -8,19 +8,31 @@
 #include <functional>
 #include <forward_list>
 
+#define test (1)
+
 using namespace std;
 
 template<class Key, class Value> class HashTable {
 
   public:
-    HashTable();
+    HashTable(size_t size);
+
     void singleWrite(Key key, Value value);
+
     const Value* singleRead(Key key);
     size_t size();
     size_t hash_func(Key key);
-
+    void remove(Key key);
+    #if test
+      struct timespec start, end,totStart,totEnd, funcTime;
+    #endif
   private:
     vector<forward_list<pair<Key,Value>>> buckets;
+    size_t capacity;
+    double load;
+    void rehash();
+
+
 
 };
 

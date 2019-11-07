@@ -1,21 +1,28 @@
 #include "HashTable.h"
 
 template<class Key, class Value>
-HashTable<Key, Value>::HashTable(){
-  buckets.resize(128);
+HashTable<Key, Value>::HashTable(size_t size){
+  buckets.resize(size);
+  capacity = size;
+  load = 0;
 }
 
 template<class Key, class Value>
 void HashTable<Key, Value>::singleWrite(Key key, Value value){
   int index = hash_func(key);
+
   buckets[index].push_front(make_pair(key, value));
+  load++;
+
+  if( ((double)(load/capacity)) > 0.60){ // Check if load factor is too high.
+    rehash();
+  }
 }
 
 template<class Key, class Value>
 const Value* HashTable<Key, Value>::singleRead(Key key){
 
   size_t index = hash_func(key);
-
   if (buckets[index].empty()){
     return nullptr;
   } else{
@@ -33,9 +40,49 @@ const Value* HashTable<Key, Value>::singleRead(Key key){
 
 template<class Key, class Value>
 size_t HashTable<Key, Value>::hash_func(Key key){
+  #if test
+    clock_gettime(CLOCK_REALTIME, &start);
+  #endif
   hash<Key> h;
-  return (h(key) % buckets.size());
+  auto r = (h(key) % capacity);
+  #if test
+    clock_gettime(CLOCK_REALTIME, &end);
+    funcTime.tv_nsec = funcTime.tv_nsec + end.tv_nsec - start.tv_nsec;
+  #endif
+  return r;
 }
+
+template<class Key, class Value>
+void HashTable<Key, Value>::rehash(){
+
+  auto temp = vector<forward_list<pair<Key,Value>>>();
+  capacity = capacity << 1;
+  temp.resize(capacity);
+
+  for(auto bucket : buckets){
+    auto it = bucket.begin();
+    auto end = bucket.end();
+    while(it != end){
+      temp[hash_func(it->first)].push_front(make_pair(it->first, it->second));
+      it++;
+    }
+  }
+  buckets = temp;
+}
+
+template<class Key, class Value>
+void HashTable<Key, Value>::remove(Key key){
+  buckets[hash_func(key)].remove_if([&](const pair<Key, Value>& obj)
+                              { return obj.first == key; });
+
+}
+
+
+template<class Key, class Value>
+size_t HashTable<Key, Value>::size(){
+  return capacity;
+}
+
 
 //wtf??????
 template class HashTable<int,int>;
