@@ -1,3 +1,6 @@
+#ifndef HASHTABLE_H
+#define HASHTABLE_H
+
 #include <iostream>
 #include <vector>
 #include <utility>
@@ -7,22 +10,20 @@
 
 using namespace std;
 
-class HashTable {
+template<class Key, class Value> class HashTable {
 
   public:
-    template<class Key, class Value>
-    void singleWrite(Key key, Value value);
-
-    template<class Key, class Value>
-    Value* singleRead(Key key);
-
-    size_t size();
     HashTable();
-
-    template<class Key, class Value>
+    void singleWrite(Key key, Value value);
+    const Value* singleRead(Key key);
+    size_t size();
     size_t hash_func(Key key);
 
   private:
-    template<class Key, class Value>
-    vector<forward_list<Pair<Key,Value>>> buckets;
+    vector<forward_list<pair<Key,Value>>> buckets;
+
 };
+
+
+
+#endif

@@ -1,38 +1,44 @@
 #include "HashTable.h"
 
 template<class Key, class Value>
-HashTable::HashTable(){
-  buckets = new vector<forward_list<Pair<Key,Value>>(128);
+HashTable<Key, Value>::HashTable(){
+  buckets.resize(128);
 }
 
 template<class Key, class Value>
-void HashTable::singleWrite(Key key, Value value){
-
+void HashTable<Key, Value>::singleWrite(Key key, Value value){
   int index = hash_func(key);
-
-  buckets[index].push_front(Pair<Key, Value>(key, value));
-
+  buckets[index].push_front(make_pair(key, value));
 }
 
 template<class Key, class Value>
-Value* HashTable::singleRead(Key key){
+const Value* HashTable<Key, Value>::singleRead(Key key){
 
   size_t index = hash_func(key);
 
-  if (buckets[index].isEmpty()){
+  if (buckets[index].empty()){
     return nullptr;
   } else{
-    for(auto it : buckets[index]){
-
-      if(key == it.first){
-        return &it.second;
+    auto it = buckets[index].begin();
+    auto end = buckets[index].end();
+    while(it != end){
+      if(key == it->first){
+        return &it->second;
       }
+      it++;
     }
-    return nullptr;
   }
+  return nullptr;
 }
 
-size_t HashTable::hash_func(Key key){
+template<class Key, class Value>
+size_t HashTable<Key, Value>::hash_func(Key key){
   hash<Key> h;
-  return h(key);
+  return (h(key) % buckets.size());
 }
+
+//wtf??????
+template class HashTable<int,int>;
+template class HashTable<string,int>;
+template class HashTable<int,string>;
+template class HashTable<string,string>;
