@@ -8,7 +8,7 @@
 #include <functional>
 #include <forward_list>
 
-#define test (1)
+#define test (0)
 
 using namespace std;
 
@@ -24,12 +24,12 @@ template<class Key, class Value> class HashTable {
     size_t hash_func(Key key);
     void remove(Key key);
     #if test
-      struct timespec start, end,totStart,totEnd, funcTime;
+      struct timespec start, end,totStart,totEnd, funcTime, totTime;
     #endif
   private:
     vector<forward_list<pair<Key,Value>>> buckets;
     size_t capacity;
-    double load;
+    size_t load;
     void rehash();
 
 

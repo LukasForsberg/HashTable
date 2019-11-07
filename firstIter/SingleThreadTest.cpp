@@ -139,6 +139,7 @@ void test9(){
   HashTable<int,int> hashTable = HashTable<int,int>(256);
   srand (time(0));
   hashTable.funcTime.tv_nsec = 0;
+  hashTable.totTime.tv_nsec = 0;
   clock_gettime(CLOCK_REALTIME, &hashTable.totStart);
   for(int i = 0; i < 100; i++){
     hashTable.singleWrite(i, i);
@@ -147,8 +148,11 @@ void test9(){
     hashTable.singleRead(i);
   }
   clock_gettime(CLOCK_REALTIME, &hashTable.totEnd);
+  hashTable.totTime.tv_nsec = hashTable.totTime.tv_nsec + hashTable.totEnd.tv_nsec - hashTable.totStart.tv_nsec;
   //double time_spent = (end.tv_sec - start.tv_sec) +
-  cout << "Test 9: total execution took : " << (hashTable.totEnd.tv_nsec - hashTable.totStart.tv_nsec) << "  Hash func took: " << (hashTable.funcTime.tv_nsec) << endl;
+  cout << "Test 9: total execution took : " << (hashTable.totTime.tv_nsec) << "  Hash func took: " << (hashTable.funcTime.tv_nsec) << endl;
+  double t = (long double)hashTable.funcTime.tv_nsec/(hashTable.funcTime.tv_nsec + hashTable.totTime.tv_nsec);
+  cout << "        hash_funs was " << t << " of total execution" << endl;
   #endif
 }
 
