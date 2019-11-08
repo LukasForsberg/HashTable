@@ -1,4 +1,5 @@
 #include "HashTable.h"
+#include <type_traits>
 
 template<class Key, class Value>
 HashTable<Key, Value>::HashTable(size_t size){
@@ -11,7 +12,7 @@ template<class Key, class Value>
 void HashTable<Key, Value>::singleWrite(Key key, Value value){
   int index = hash_func(key);
 
-  buckets[index].push_front(make_pair(key, value));
+  buckets[index].push_front(make_pair(move(key), move(value)));
   load++;
   // this is actually 3 times faster!!! equal to load/capacity > 0.625
   if(load > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
@@ -38,6 +39,7 @@ const Value* HashTable<Key, Value>::singleRead(Key key){
   return nullptr;
 }
 
+
 template<class Key, class Value>
 size_t HashTable<Key, Value>::hash_func(Key key){
   #if test
@@ -55,6 +57,22 @@ size_t HashTable<Key, Value>::hash_func(Key key){
   return r;
 }
 
+/*
+// alternative hash function, it is super slow so dont use it.
+template<class Key, class Value>
+size_t HashTable<Key, Value>::hash_func(Key key){
+  size_t len = 4;//sizeof(Key);
+  uint8_t* ptr = (uint8_t*)(&key);
+  size_t hash = 401;
+  for(size_t i = 0; i < len; i++){
+    hash = ((hash << 2) + (int)(*ptr));
+    ptr++;
+  }
+  return hash % capacity;
+}
+*/
+
+
 template<class Key, class Value>
 void HashTable<Key, Value>::rehash(){
 
@@ -66,7 +84,7 @@ void HashTable<Key, Value>::rehash(){
     auto it = bucket.begin();
     auto end = bucket.end();
     while(it != end){
-      temp[hash_func(it->first)].push_front(make_pair(it->first, it->second));
+      temp[hash_func(it->first)].push_front(move(*it));
       it++;
     }
   }
@@ -77,7 +95,6 @@ template<class Key, class Value>
 void HashTable<Key, Value>::remove(Key key){
   buckets[hash_func(key)].remove_if([&](const pair<Key, Value>& obj)
                               { return obj.first == key; });
-
 }
 
 

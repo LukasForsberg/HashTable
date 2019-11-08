@@ -12,7 +12,7 @@ CC  = $(CXX)
 # -g is for debugging.
 CPPFLAGS =  -std=c++11 -I.
 CXXFLAGS = -Wall -Wextra -pedantic-errors -Wold-style-cast
-CXXFLAGS += -std=c++11
+CXXFLAGS += -std=c++11 -o3
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
 LDFLAGS =   -g
