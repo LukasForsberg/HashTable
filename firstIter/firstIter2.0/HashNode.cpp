@@ -5,7 +5,7 @@ template<class Key, class Value>
 HashNode<Key, Value>::HashNode(Key k, Value val){
   key = k;
   value = val;
-  next =4 nullptr;
+  next = nullptr;
 }
 
 template<class Key, class Value>
