@@ -28,7 +28,7 @@ PROGS = SingleThreadTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
-SingleThreadTest: SingleThreadTest.o HashTable.o
+SingleThreadTest: SingleThreadTest.o HashTable.o HashNode.o 
 #HashTable: HashTable.o
 
 

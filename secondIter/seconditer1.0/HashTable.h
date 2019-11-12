@@ -2,11 +2,7 @@
 #define HASHTABLE_H
 
 #include <iostream>
-#include <vector>
-#include <utility>
 #include <cstdlib>
-#include <functional>
-#include <forward_list>
 #include "InvalidReadException.h"
 #include "HashNode.h"
 
@@ -18,6 +14,7 @@ template<class Key, class Value> class HashTable {
 
   public:
     HashTable(size_t size);
+    ~HashTable();
 
     void singleWrite(Key key, Value value);
     Value singleRead(Key key);

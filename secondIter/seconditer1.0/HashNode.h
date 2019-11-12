@@ -1,5 +1,4 @@
 
-
 template<class Key, class Value> class HashNode{
 
 public:

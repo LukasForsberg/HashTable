@@ -3,24 +3,48 @@
 
 template<class Key, class Value>
 HashTable<Key, Value>::HashTable(size_t size){
-  buckets = new HashNode<Key,Value>*[size];
+  buckets = new Bucket<Key,Value>[size];
+  for(size_t i = 0; i < size; i++){
+    buckets[i] = Bucket();
+  }
   capacity = size;
   load = 0;
+}
+
+template<class Key, class Value>
+HashTable<Key, Value>::~HashTable(){
+  Bucket* node;
+  Bucket* temp;
+  for(size_t i = 0; i < capacity; i++){
+    node = &buckets[i];
+    while(node != nullptr){
+      temp = node->getNext();
+      delete node;
+      node = temp;
+    }
+  }
+  delete [] buckets;
 }
 
 template<class Key, class Value>
 void HashTable<Key, Value>::singleWrite(Key key, Value value){
   int index = hash_func(key);
   auto node = buckets[index];
-  while(node != nullptr){
-    if(key == node->getKey()){
-       node->setValue(value);
-       break;
+  {
+    std::unique_lock lock(*(node->getMutex()));
+    while(node != nullptr){
+      if(key == node->getKey()){
+         node->setValue(value);
+         break;
+      }
+      node = node->getNext();
     }
-    node = node->getNext();
-  }
-  if(node == nullptr){
-    node = new HashNode<Key,Value>(key,value);
+    if(node == nullptr){
+      node = new HashNode<Key,Value>(key,value);
+      node->insertNext(buckets[index]);
+      buckets[index] = node;
+      this->load++;
+    }
   }
   // this is actually 3 times faster!!! equal to load/capacity > 0.625
   if(load > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
@@ -32,17 +56,20 @@ template<class Key, class Value>
 Value HashTable<Key, Value>::singleRead(Key key){
 
   size_t index = hash_func(key);
-  if (buckets[index] == nullptr){
-    throw InvalidReadExeption();
-  } else{
-    auto node = buckets[index];
-    do{
-      if(key == node.getKey){
-        return node->getValue();
+  auto node = buckets[index];
+  {
+    std::shared_lock lock(*(node->getMutex()));
+    if (node == nullptr){
+      throw InvalidReadExeption();
+    } else {
+      do{
+        if(key == node->getKey()){
+          return node->getValue();
+        }
+        node = node->getNext();
+      } while(node != nullptr);
+        throw InvalidReadExeption();
       }
-      node = node->getNext();
-    }while(node != nullptr);
-  throw InvalidReadExeption();
   }
 }
 
@@ -68,9 +95,12 @@ template<class Key, class Value>
 void HashTable<Key, Value>::rehash(){
   size_t old_capacity = capacity;
   capacity = capacity << 1;
-  HashNode<Key,Value>** temp = new HashNode<Key,Value*[capacity];
+  HashNode<Key,Value>** temp = new HashNode<Key,Value>*[capacity];
+  for(size_t i = 0; i < capacity; i++){
+    temp[i] = nullptr;
+  }
   HashNode<Key,Value>* node;
-  for(int i = 0; i < old_capacity){
+  for(size_t i = 0; i < old_capacity; i++){
     node = buckets[i];
     while(node != nullptr){
       temp[hash_func(node->getKey())] = node;
@@ -83,16 +113,25 @@ void HashTable<Key, Value>::rehash(){
 
 template<class Key, class Value>
 void HashTable<Key, Value>::remove(Key key){
-  HashNode<Key,Value>* node = buckets[hash_func(key)];
+  auto index = hash_func(key);
+  HashNode<Key,Value>* node = buckets[index];
   HashNode<Key,Value>* prev_node = nullptr;
-  while(node != nullptr){
-    if(node->getKey() == key){
-      prev_node->setNext(node->getNext());
-      delete node;
-      return;
+  {
+    std::unique_lock lock(*(node->getMutex()));
+    while(node != nullptr){
+      if(node->getKey() == key){
+        if(prev_node != nullptr){
+          prev_node->insertNext(node->getNext());
+        } else {
+          buckets[index] = node->getNext();
+        }
+        load--;
+        delete node;
+        return;
+      }
+      prev_node = node;
+      node = node->getNext();
     }
-    prev_node = node;
-    node = node->getNext();
   }
 }
 
