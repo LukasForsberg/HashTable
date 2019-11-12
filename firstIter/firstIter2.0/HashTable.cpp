@@ -68,47 +68,42 @@ void HashTable<Key, Value>::rehash(){
   size_t old_capacity = capacity;
   capacity = capacity << 1;
   HashNode<Key,Value>** temp = new HashNode<Key,Value*[capacity];
+  HashNode<Key,Value>* node;
   for(int i = 0; i < old_capacity){
-
-  }
-  for(auto bucket : buckets){
-    auto it = bucket.begin();
-    auto end = bucket.end();
-    while(it != end){
-      temp[hash_func(it->first)].push_front(move(*it));
-      it++;
+    node = buckets[i];
+    while(node != nullptr){
+      temp[hash_func(node->getKey())] = node;
+      node = node->getNext();
     }
   }
+  delete [] buckets;
   buckets = temp;
 }
 
 template<class Key, class Value>
 void HashTable<Key, Value>::remove(Key key){
-  buckets[hash_func(key)].remove_if([&](const pair<Key, Value>& obj)
-                              { return obj.first == key; });
+  HashNode<Key,Value>* node = buckets[hash_func(key)];
+  HashNode<Key,Value>* prev_node = nullptr;
+  while(node != nullptr){
+    if(node->getKey() == key){
+      prev_node->setNext(node->getNext());
+      delete node;
+      return;
+    }
+    prev_node = node;
+    node = node->getNext();
+  }
 }
 
 template<class Key, class Value>
 bool HashTable<Key, Value>::contains(const Key key){
-  int index = hash_func(key);
-  return quickContains(index,key) != nullptr;
-}
-
-template<class Key, class Value>
-Value* HashTable<Key, Value>::quickContains(int index, const Key key){
-  if (buckets[index].empty()){
-    return nullptr;
-  } else {
-    auto it = buckets[index].begin();
-    auto end = buckets[index].end();
-    while(it != end){
-      if( it->first == key  ){
-        return &it->second;
-      }
-      it++;
+  HashNode<Key,Value>* node = buckets[hash_func(key)];
+  while (node != nullptr){
+    if(node->getKey() == key){
+      return true;
     }
   }
-  return nullptr;
+  return false;
 }
 
 
