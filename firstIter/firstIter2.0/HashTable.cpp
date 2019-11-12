@@ -4,8 +4,26 @@
 template<class Key, class Value>
 HashTable<Key, Value>::HashTable(size_t size){
   buckets = new HashNode<Key,Value>*[size];
+  for(size_t i = 0; i < size; i++){
+    buckets[i] = nullptr;
+  }
   capacity = size;
   load = 0;
+}
+
+template<class Key, class Value>
+HashTable<Key, Value>::~HashTable(){
+  HashNode<Key,Value>* node;
+  HashNode<Key,Value>* temp;
+  for(size_t i = 0; i < capacity; i++){
+    node = buckets[i];
+    while(node != nullptr){
+      temp = node->getNext();
+      delete node;
+      node = temp;
+    }
+  }
+  delete [] buckets;
 }
 
 template<class Key, class Value>
@@ -21,6 +39,9 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
   }
   if(node == nullptr){
     node = new HashNode<Key,Value>(key,value);
+    node->insertNext(buckets[index]);
+    buckets[index] = node;
+    this->load++;
   }
   // this is actually 3 times faster!!! equal to load/capacity > 0.625
   if(load > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
@@ -34,16 +55,16 @@ Value HashTable<Key, Value>::singleRead(Key key){
   size_t index = hash_func(key);
   if (buckets[index] == nullptr){
     throw InvalidReadExeption();
-  } else{
+  } else {
     auto node = buckets[index];
     do{
-      if(key == node.getKey){
+      if(key == node->getKey()){
         return node->getValue();
       }
       node = node->getNext();
-    }while(node != nullptr);
-  throw InvalidReadExeption();
-  }
+    } while(node != nullptr);
+      throw InvalidReadExeption();
+    }
 }
 
 
@@ -68,9 +89,12 @@ template<class Key, class Value>
 void HashTable<Key, Value>::rehash(){
   size_t old_capacity = capacity;
   capacity = capacity << 1;
-  HashNode<Key,Value>** temp = new HashNode<Key,Value*[capacity];
+  HashNode<Key,Value>** temp = new HashNode<Key,Value>*[capacity];
+  for(size_t i = 0; i < capacity; i++){
+    temp[i] = nullptr;
+  }
   HashNode<Key,Value>* node;
-  for(int i = 0; i < old_capacity){
+  for(size_t i = 0; i < old_capacity; i++){
     node = buckets[i];
     while(node != nullptr){
       temp[hash_func(node->getKey())] = node;
@@ -83,11 +107,17 @@ void HashTable<Key, Value>::rehash(){
 
 template<class Key, class Value>
 void HashTable<Key, Value>::remove(Key key){
-  HashNode<Key,Value>* node = buckets[hash_func(key)];
+  auto index = hash_func(key);
+  HashNode<Key,Value>* node = buckets[index];
   HashNode<Key,Value>* prev_node = nullptr;
   while(node != nullptr){
     if(node->getKey() == key){
-      prev_node->setNext(node->getNext());
+      if(prev_node != nullptr){
+        prev_node->insertNext(node->getNext());
+      } else {
+        buckets[index] = node->getNext();
+      }
+      load--;
       delete node;
       return;
     }

@@ -144,6 +144,7 @@ void performance_test2(){
 }
 
 void performance_test3(){
+  cout << "started test 3 " << endl;
   HashTable<int,int> hashTable = HashTable<int,int>(64);
   srand (time(0));
   struct timespec start, end;
@@ -209,7 +210,6 @@ int main(){
   test4();
   test5();
   test6();
-
   cout << endl;
 
   performance_test1();
@@ -219,4 +219,5 @@ int main(){
   #if test
     performance_test5();
   #endif
+
 }

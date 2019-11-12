@@ -1,8 +1,10 @@
 #include "HashNode.h"
+#include <string>
 
+using std::string;
 
 template<class Key, class Value>
-HashNode<Key, Value>::HashNode(Key k, Value val){
+HashNode<Key, Value>::HashNode(Key& k, Value& val){
   key = k;
   value = val;
   next = nullptr;
@@ -29,6 +31,11 @@ void HashNode<Key, Value>::insertNext(HashNode<Key, Value>* next_node){
 }
 
 template<class Key, class Value>
-HashNode<Key, Value> HashNode<Key, Value>::getNext(HashNode<Key, Value>* next_node){
+HashNode<Key, Value>* HashNode<Key, Value>::getNext(){
   return next;
 }
+
+template class HashNode<int,int>;
+template class HashNode<string,int>;
+template class HashNode<int,string>;
+template class HashNode<string,string>;
