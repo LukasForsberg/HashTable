@@ -20,7 +20,6 @@ template<class Key, class Value> class HashTable {
     HashTable(size_t size);
 
     void singleWrite(Key key, Value value);
-
     Value singleRead(Key key);
 
     size_t size();
@@ -37,8 +36,6 @@ template<class Key, class Value> class HashTable {
     size_t capacity;
     size_t load;
     void rehash();
-    pair<Key,Value>* get(Key key);
-    Value* quickContains(int index, const Key key); // just as contains but assumes already hashed key
 
 
 
