@@ -11,9 +11,13 @@ HashTable<Key, Value>::HashTable(size_t size){
 template<class Key, class Value>
 void HashTable<Key, Value>::singleWrite(Key key, Value value){
   int index = hash_func(key);
-
-  buckets[index].push_front(make_pair(move(key), move(value)));
-  load++;
+  Value* val_ptr = quickContains(index,key);
+  if(val_ptr == nullptr){
+    load++;
+    buckets[index].push_front(make_pair(move(key), move(value)));
+  } else {
+    *val_ptr = move(value);
+  }
   // this is actually 3 times faster!!! equal to load/capacity > 0.625
   if(load > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
     rehash();
@@ -21,22 +25,22 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
 }
 
 template<class Key, class Value>
-const Value* HashTable<Key, Value>::singleRead(Key key){
+Value HashTable<Key, Value>::singleRead(Key key){
 
   size_t index = hash_func(key);
   if (buckets[index].empty()){
-    return nullptr;
+    throw InvalidReadExeption();
   } else{
     auto it = buckets[index].begin();
     auto end = buckets[index].end();
     while(it != end){
       if(key == it->first){
-        return &it->second;
+        return it->second;
       }
       it++;
     }
   }
-  return nullptr;
+  throw InvalidReadExeption();
 }
 
 
@@ -97,9 +101,37 @@ void HashTable<Key, Value>::remove(Key key){
                               { return obj.first == key; });
 }
 
+template<class Key, class Value>
+bool HashTable<Key, Value>::contains(const Key key){
+  int index = hash_func(key);
+  return quickContains(index,key) != nullptr;
+}
+
+template<class Key, class Value>
+Value* HashTable<Key, Value>::quickContains(int index, const Key key){
+  if (buckets[index].empty()){
+    return nullptr;
+  } else {
+    auto it = buckets[index].begin();
+    auto end = buckets[index].end();
+    while(it != end){
+      if( it->first == key  ){
+        return &it->second;
+      }
+      it++;
+    }
+  }
+  return nullptr;
+}
+
 
 template<class Key, class Value>
 size_t HashTable<Key, Value>::size(){
+  return load;
+}
+
+template<class Key, class Value>
+size_t HashTable<Key, Value>::getCapacity(){
   return capacity;
 }
 
