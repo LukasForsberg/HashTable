@@ -3,7 +3,7 @@
 
 template<class Key, class Value>
 HashTable<Key, Value>::HashTable(size_t size){
-  buckets = new HashNode<Key,Value*[size];
+  buckets = new HashNode<Key,Value>*[size];
   capacity = size;
   load = 0;
 }
@@ -14,16 +14,16 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
   auto node = buckets[index];
   while(node != nullptr){
     if(key == node->getKey()){
-       node->setValue(Value);
+       node->setValue(value);
        break;
     }
     node = node->getNext();
   }
   if(node == nullptr){
-    node = new HashNode<Key,Value>(Key,Value);
+    node = new HashNode<Key,Value>(key,value);
   }
   // this is actually 3 times faster!!! equal to load/capacity > 0.625
-  if(load > ( (capacity >> 1) + (capacity >> 2) - (capacity >> <3) ) ){
+  if(load > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
     rehash();
   }
 }
@@ -43,6 +43,7 @@ Value HashTable<Key, Value>::singleRead(Key key){
       node = node->getNext();
     }while(node != nullptr);
   throw InvalidReadExeption();
+  }
 }
 
 
