@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include "InvalidReadException.h"
 #include "HashNode.h"
+#include "Bucket.h"
+#include <atomic>
 
 #define test (0)
 
@@ -25,14 +27,20 @@ template<class Key, class Value> class HashTable {
     void remove(Key key);
     bool contains(const Key key);
 
+    void checkFlag(shared_lock& lock);
+    void checkFlag(unique_lock& lock);
+
     #if test
       struct timespec start, end,totStart,totEnd, funcTime, totTime;
     #endif
   private:
-    HashNode<Key,Value>** buckets;
+    Bucket<Key,Value>* buckets;
     size_t capacity;
     size_t load;
     void rehash();
+    atomic<bool> hash_flag;
+    atomic<uint16_t> active_users;
+    condition_variable_any cv;
 
 
 

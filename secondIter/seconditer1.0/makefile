@@ -10,9 +10,9 @@ CC  = $(CXX)
 # Define preprocessor, compiler, and linker flags. Uncomment the # lines
 # if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
 # -g is for debugging.
-CPPFLAGS =  -std=c++11 -I.
+CPPFLAGS =  -std=c++17 -I.
 CXXFLAGS = -Wall -Wextra -pedantic-errors -Wold-style-cast
-CXXFLAGS += -std=c++11 -o3
+CXXFLAGS +=  -o3
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
 LDFLAGS =   -g
@@ -28,8 +28,8 @@ PROGS = SingleThreadTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
-SingleThreadTest: SingleThreadTest.o HashTable.o HashNode.o 
-#HashTable: HashTable.o
+SingleThreadTest: SingleThreadTest.o HashTable.o HashNode.o
+MultipleThreadsTest: MultipleThreadsTest.o HashTable.o HashNode.o
 
 
 # Phony targets
