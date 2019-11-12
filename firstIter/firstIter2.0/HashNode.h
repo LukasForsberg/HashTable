@@ -8,7 +8,7 @@ public:
   Key getKey();
   Value getValue();
   void insertNext(HashNode<Key, Value>* next_node);
-  void setValue();
+  void setValue(Value &value);
   HashNode<Key, Value>* getNext();
 
 private:

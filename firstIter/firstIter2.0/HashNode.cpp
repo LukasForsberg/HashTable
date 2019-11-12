@@ -19,7 +19,7 @@ Value HashNode<Key, Value>::getValue(){
 }
 
 template<class Key, class Value>
-void HashNode<Key, Value>::setValue(Value val){
+void HashNode<Key, Value>::setValue(Value &val){
   value = val;
 }
 
