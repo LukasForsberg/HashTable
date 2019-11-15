@@ -4,6 +4,7 @@
 #include <mutex>
 #include <shared_mutex>
 #include <string>
+#include "HashNode.h"
 
 template<class Key, class Value> class Bucket{
 
@@ -12,20 +13,12 @@ public:
   HashNode<Key,Value>* getNode(){ return node; }
   std::shared_timed_mutex* getMutex(){ return &mtx; }
   bool empty(){ return node == nullptr; };
+  void append(HashNode<Key, Value>* new_node);
 
   Bucket() { node = nullptr; }
   Bucket(HashNode<Key,Value>* newNode) { node = newNode; }
-  ~Bucket() {
-    HashNode<Key,Value>* temp;
-    while( node != nullptr){
-      temp = node->getNext();
-      delete node;
-      node = temp;
-    }
-  }
-  Bucket(Bucket<Key,Value> const& copy){
-    node = copy.node;
-  }
+  ~Bucket();
+  Bucket(Bucket<Key,Value> const& copy){ node = copy.node; }
   Bucket& operator=(Bucket rhs) // Pass by value (thus generating a copy)
   {
     this->node = rhs.node;

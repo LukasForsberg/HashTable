@@ -10,30 +10,30 @@ CC  = $(CXX)
 # Define preprocessor, compiler, and linker flags. Uncomment the # lines
 # if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
 # -g is for debugging.
-CPPFLAGS =  -std=c++17 -I.
+CPPFLAGS =  -std=c++17 -I. -pthread
 CXXFLAGS = -Wall -Wextra -pedantic-errors -Wold-style-cast
 CXXFLAGS +=  -o3
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
-LDFLAGS =   -g
+LDFLAGS =   -g -pthread
 #<<<<<<< HEAD:lab3/Makefile
 #LDLIBS = -llab1
 #>>>>>>> 66f8aecc57cd547e4d720bb76d2dc5643db909ab:Makefile
 #CPPFLAGS += -stdlib=libc++
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS +=  -stdlib=libc++
-
+HASH_PROGS = HashTable.o HashNode.o Bucket.o
 # Targets
 PROGS = SingleThreadTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
-SingleThreadTest: SingleThreadTest.o HashTable.o HashNode.o
-MultipleThreadsTest: MultipleThreadsTest.o HashTable.o HashNode.o
+SingleThreadTest: SingleThreadTest.o $(HASH_PROGS)
+MultipleThreadsTest: MultipleThreadsTest.o $(HASH_PROGS)
 
 
 # Phony targets
-.PHONY: all test clean distclean
+.PHONY: all clean distclean
 
 # Standard clean
 clean:

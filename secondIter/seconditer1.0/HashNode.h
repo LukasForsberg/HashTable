@@ -1,3 +1,6 @@
+#ifndef HASHNODE_H
+#define HASHNODE_H
+
 
 template<class Key, class Value> class HashNode{
 
@@ -16,6 +19,6 @@ private:
   Key key;
   Value value;
 
-
-
 };
+
+#endif

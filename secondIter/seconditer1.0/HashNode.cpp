@@ -35,21 +35,6 @@ HashNode<Key, Value>* HashNode<Key, Value>::getNext(){
   return next;
 }
 
-template<class Key, class Value>
-std::shared_mutex*  HashNode<Key, Value>::getMutex(){
-  return &mtx;
-}
-
-template<class Key, class Value>
-bool HashNode<Key, Value>::isUsed(){
-  return used;
-}
-
-template<class Key, class Value>
-void HashNode<Key, Value>::setUsed(bool flag){
-  used = flag;
-}
-
 template class HashNode<int,int>;
 template class HashNode<string,int>;
 template class HashNode<int,string>;

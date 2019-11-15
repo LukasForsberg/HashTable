@@ -36,7 +36,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
     }
     if(node == nullptr){
       node = new HashNode<Key,Value>(key,value);
-      bucket->setNode(node);
+      bucket->append(node);
       this->load++;
     }
   }
@@ -92,15 +92,15 @@ template<class Key, class Value>
 void HashTable<Key, Value>::rehash(){
   size_t old_capacity = capacity;
   capacity = capacity << 1;
-  HashNode<Key,Value>** temp = new Bucket<Key,Value>*[capacity];
-  for(size_t i = 0; i < capacity; i++){
-    temp[i] = nullptr;
-  }
+  Bucket<Key,Value>* temp = new Bucket<Key,Value>[capacity];
+  /*for(size_t i = 0; i < capacity; i++){
+    temp[i] = Bucket();
+  }*/
   HashNode<Key,Value>* node;
   for(size_t i = 0; i < old_capacity; i++){
-    node = buckets[i];
+    node = buckets[i].getNode();
     while(node != nullptr){
-      temp[hash_func(node->getKey())] = node;
+      temp[hash_func(node->getKey())].append(node);
       node = node->getNext();
     }
   }
@@ -160,16 +160,16 @@ size_t HashTable<Key, Value>::getCapacity(){
 }
 
 template<class Key, class Value>
-void HashTable<Key, Value>::checkFlag(shared_lock& lock){
+void HashTable<Key, Value>::checkFlag(shared_lock<std::shared_timed_mutex>& lock){
   while(hash_flag){
-    cv.wait(lock)
+    cv.wait(lock);
   }
 }
 
 template<class Key, class Value>
-void HashTable<Key, Value>::checkFlag(unique_lock& lock){
+void HashTable<Key, Value>::checkFlag(unique_lock<std::shared_timed_mutex>& lock){
   while(hash_flag){
-    cv.wait(lock)
+    cv.wait(lock);
   }
 }
 
