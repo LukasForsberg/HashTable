@@ -38,8 +38,8 @@ template<class Key, class Value> class HashTable {
     size_t capacity;
     size_t load;
     void rehash();
-    atomic<bool> hash_flag;
 
+    atomic_flag rehash_lock = ATOMIC_FLAG_INIT;
     atomic<uint16_t> active_users;
     condition_variable_any cv;
 
