@@ -6,8 +6,7 @@ HashTable<Key, Value>::HashTable(size_t size){
   buckets = new Bucket<Key,Value>[size];
   capacity = size;
   load = 0;
-  hash_flag = false;
-  active_users = 0;
+  rehash_flag = false;
 }
 
 template<class Key, class Value>
@@ -27,57 +26,64 @@ HashTable<Key, Value>::~HashTable(){
 
 template<class Key, class Value>
 void HashTable<Key, Value>::singleWrite(Key key, Value value){
-  int index = hash_func(key);
-  auto bucket = &buckets[index];
-  auto node = bucket->getNode();
   {
-    std::unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
-    checkFlag(lock);
-    active_users.fetch_add(1, std::memory_order_relaxed);
-    while(node != nullptr){
-      if(key == node->getKey()){
-         node->setValue(value);
-         break;
+    shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+    checkFlag(hash_lock);
+    int index = hash_func(key);
+    auto bucket = &buckets[index];
+    auto node = bucket->getNode();
+    {
+      std::unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+      while(node != nullptr){
+        if(key == node->getKey()){
+           node->setValue(value);
+           break;
+        }
+        node = node->getNext();
       }
-      node = node->getNext();
-    }
-    if(node == nullptr){
-      node = new HashNode<Key,Value>(key,value);
-      bucket->append(node);
-      this->load++;
+      if(node == nullptr){
+        node = new HashNode<Key,Value>(key,value);
+        bucket->append(node);
+        load.fetch_add(1, std::memory_order_relaxed);
+      }
     }
   }
-  active_users.fetch_sub(1, std::memory_order_relaxed);
   // this is actually 3 times faster!!! equal to load/capacity > 0.625
-  if(load > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
-    if(!atomic_flag_test_and_set_explicit(&rehash_lock, memory_order_consume)){
+  if(load.load(memory_order_relaxed) > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
+    // exsclusive lock,
+    rehash_mutex.lock();
+    if(!rehash_flag){
+      rehash_flag = true;
+      rehash_mutex.unlock();
       rehash();
+      rehash_mutex.lock();
+      rehash_flag = false;
+      rehash_mutex.unlock();
+      cv.notify_all();
+    } else {
+      rehash_mutex.unlock();
     }
   }
 }
 
 template<class Key, class Value>
 Value HashTable<Key, Value>::singleRead(Key key){
-
+  shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+  checkFlag(hash_lock);
   size_t index = hash_func(key);
   auto bucket = &buckets[index];
   auto node = bucket->getNode();
   {
     std::shared_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
-    checkFlag(lock);
-    active_users.fetch_add(1, std::memory_order_relaxed);
     if (node == nullptr){
-      active_users.fetch_sub(1, std::memory_order_relaxed);
       throw InvalidReadExeption();
     } else {
       do{
         if(key == node->getKey()){
-          active_users.fetch_sub(1, std::memory_order_relaxed);
           return node->getValue();
         }
         node = node->getNext();
       } while(node != nullptr);
-        active_users.fetch_sub(1, std::memory_order_relaxed);
         throw InvalidReadExeption();
       }
   }
@@ -116,20 +122,18 @@ void HashTable<Key, Value>::rehash(){
   }
   delete [] buckets;
   buckets = temp;
-  atomic_flag_clear_explicit(&rehash_lock, std::memory_order_release);
-  cv.notify_all();
 }
 
 template<class Key, class Value>
 void HashTable<Key, Value>::remove(Key key){
+  shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+  checkFlag(hash_lock);
   auto index = hash_func(key);
   Bucket<Key,Value>* bucket = &buckets[index];
   HashNode<Key,Value>* node = bucket->getNode();
   HashNode<Key,Value>* prev_node = nullptr;
   {
     std::unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
-    checkFlag(lock);
-    active_users.fetch_add(1, std::memory_order_relaxed);
     while(node != nullptr){
       if(node->getKey() == key){
         if(prev_node != nullptr){
@@ -137,9 +141,8 @@ void HashTable<Key, Value>::remove(Key key){
         } else {
           bucket->setNode(node->getNext());
         }
-        load--;
+        load.fetch_sub(1, std::memory_order_relaxed);
         delete node;
-        active_users.fetch_sub(1, std::memory_order_relaxed);
         return;
       }
       prev_node = node;
@@ -150,18 +153,16 @@ void HashTable<Key, Value>::remove(Key key){
 
 template<class Key, class Value>
 bool HashTable<Key, Value>::contains(const Key key){
+  shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+  checkFlag(hash_lock);
   Bucket<Key,Value>* bucket = &buckets[hash_func(key)];
   auto node = bucket->getNode();
-  std::unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
-  checkFlag(lock);
-  active_users.fetch_add(1, std::memory_order_relaxed);
+  std::shared_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
   while (node != nullptr){
     if(node->getKey() == key){
-      active_users.fetch_sub(1, std::memory_order_relaxed);
       return true;
     }
   }
-  active_users.fetch_sub(1, std::memory_order_relaxed);
   return false;
 }
 
@@ -177,18 +178,12 @@ size_t HashTable<Key, Value>::getCapacity(){
 }
 
 template<class Key, class Value>
-void HashTable<Key, Value>::checkFlag(shared_lock<std::shared_timed_mutex>& lock){
-  while(rehash_lock){
+void HashTable<Key, Value>::checkFlag(shared_lock<shared_timed_mutex>& lock){
+  while(rehash_flag){
     cv.wait(lock);
   }
 }
 
-template<class Key, class Value>
-void HashTable<Key, Value>::checkFlag(unique_lock<std::shared_timed_mutex>& lock){
-  while(rehash_lock){
-    cv.wait(lock);
-  }
-}
 
 //wtf??????
 template class HashTable<int,int>;

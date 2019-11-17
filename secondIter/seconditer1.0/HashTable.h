@@ -27,8 +27,8 @@ template<class Key, class Value> class HashTable {
     void remove(Key key);
     bool contains(const Key key);
 
-    void checkFlag(shared_lock<std::shared_timed_mutex>& lock);
-    void checkFlag(unique_lock<std::shared_timed_mutex>& lock);
+    void checkFlag(shared_lock<shared_timed_mutex>& lock);
+
 
     #if test
       struct timespec start, end,totStart,totEnd, funcTime, totTime;
@@ -36,11 +36,11 @@ template<class Key, class Value> class HashTable {
   private:
     Bucket<Key,Value>* buckets;
     size_t capacity;
-    size_t load;
+    atomic<uint16_t> load;
     void rehash();
 
-    atomic_flag rehash_lock = ATOMIC_FLAG_INIT;
-    atomic<uint16_t> active_users;
+    bool rehash_flag;
+    mutable shared_timed_mutex rehash_mutex;
     condition_variable_any cv;
 
 
