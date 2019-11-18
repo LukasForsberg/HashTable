@@ -7,10 +7,12 @@ template<class Key, class Value> class HashNode{
 public:
 
   HashNode(Key key, Value value);
+  HashNode();
   Key getKey();
   Value getValue();
   void insertNext(HashNode<Key, Value>* next_node);
   void setValue(Value &value);
+  void setNode(Key key, Value value);
   HashNode<Key, Value>* getNext();
 
 private:

@@ -36,6 +36,19 @@ HashNode<Key, Value>* HashNode<Key, Value>::getNext(){
   return next;
 }
 
+template<class Key, class Value>
+HashNode<Key, Value>::HashNode(){
+  next = nullptr;
+}
+
+template<class Key, class Value>
+void HashNode<Key, Value>::setNode(Key key, Value value){
+  this->key = key;
+  this->value = value;
+  this->next = nullptr;
+}
+
+
 template class HashNode<int,int>;
 template class HashNode<string,int>;
 template class HashNode<int,string>;

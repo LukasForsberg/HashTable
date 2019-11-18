@@ -4,7 +4,7 @@
 #include <memory>
 #include "HashTable.h"
 
-template<class Key, class Value>  union ArenaItem {
+template<class Key, class Value>  class ArenaItem {
 private:
 
     // Points to the next freely available item.
@@ -19,7 +19,12 @@ private:
   void set_next_item(ArenaItem *n) { next = n; }
 
   // Methods for the storage of the item.
-  HashNode<Key, Value> *get_storage() { return datum; }
+  HashNode<Key, Value> *get_storage() { return &datum; }
+
+  static ArenaItem<Key,Value> *storage_to_item(HashNode<Key,Value> *t) {
+      ArenaItem<Key,Value> *current_item = reinterpret_cast<ArenaItem<Key,Value> *>(t);
+      return current_item;
+    }
 
 }; // minipool_item
 

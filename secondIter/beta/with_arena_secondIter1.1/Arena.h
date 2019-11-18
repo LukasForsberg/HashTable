@@ -3,57 +3,53 @@
 
 #include "SubArena.h"
 
-template <typename T> class Arena {
+template<class Key, class Value> class Arena {
 
 private:
   //Size of the arenas created by the pool.
   size_t arena_size;
   // Current arena. Changes when it becomes full and we want to allocate one
   // more object.
-  std::unique_ptr<SubArena<T>> arena;
+  SubArena<Key,Value>* arena;
   // List of free elements. The list can be threaded between different arenas
   // depending on the deallocation pattern.
-  ArenaItem<T> *free_list;
+  ArenaItem<Key,Value> *free_list;
 
 public:
   // Creates a new pool that will use arenas of arena_size.
 Arena(size_t arena_size)
-    : arena_size(arena_size), arena(new SubArena<T>(arena_size)),
+    : arena_size(arena_size), arena(new SubArena<Key,Value>(arena_size)),
       free_list(arena->get_storage()) {}
 
 // Allocates an object in the current arena.
-template <typename... Args> T *alloc(Args &&... args) {
+HashNode<Key,Value>* alloc(Key key, Value value) {
   if (free_list == nullptr) {
     // If the current arena is full, create a new one.
-    std::unique_ptr<SubArena<T>> new_arena(new SubArena<T>(arena_size));
+    SubArena<Key,Value>* new_arena = new SubArena<Key,Value>(arena_size);
     // Link the new arena to the current one.
-    new_arena->set_next_arena(std::move(arena));
+    new_arena->set_next_arena(arena);
     // Make the new arena the current one.
-    arena.reset(new_arena.release());
+    arena = new_arena;
     // Update the free_list with the storage of the just created arena.
     free_list = arena->get_storage();
   }
 
   // Get the first free item.
-  ArenaItem<T> *current_item = free_list;
+  ArenaItem<Key,Value> *current_item = free_list;
   // Update the free list to the next free item.
   free_list = current_item->get_next_item();
 
   // Get the storage for T.
-  T *result = current_item->get_storage();
+  HashNode<Key,Value> *result = current_item->get_storage();
   // Construct the object in the obtained storage.
-  new (result) T(std::forward<Args>(args)...);
-
+  result->setNode(key,value);
   return result;
 }
 
-void free(T *t) {
-  // Destroy the object.
-  t->T::~T();
-
+void free(HashNode<Key,Value> *t) {
   // Convert this pointer to T to its enclosing pointer of an item of the
   // arena.
-  ArenaItem<T> *current_item = ArenaItem<T>::storage_to_item(t);
+  ArenaItem<Key,Value> *current_item = ArenaItem<Key,Value>::storage_to_item(t);
 
   // Add the item at the beginning of the free list.
   current_item->set_next_item(free_list);
