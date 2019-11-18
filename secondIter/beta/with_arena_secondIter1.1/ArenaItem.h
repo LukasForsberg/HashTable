@@ -2,16 +2,16 @@
 #define ARENAITEM_H
 
 #include <memory>
+#include "HashTable.h"
 
-template <typename T> union ArenaItem {
-  private:
-    using StorageType = alignas(alignof(T)) char[sizeof(T)];
+template<class Key, class Value>  union ArenaItem {
+private:
 
     // Points to the next freely available item.
     ArenaItem *next;
     // Storage of the item. Note that this is a union
     // so it is shared with the pointer "next" above.
-    StorageType datum;
+    HashNode<Key, Value> datum;
 
   public:
   // Methods for the list of free items.
@@ -19,13 +19,8 @@ template <typename T> union ArenaItem {
   void set_next_item(ArenaItem *n) { next = n; }
 
   // Methods for the storage of the item.
-  T *get_storage() { return reinterpret_cast<T *>(datum); }
+  HashNode<Key, Value> *get_storage() { return datum; }
 
-  // Given a T* cast it to a minipool_item*
-  static ArenaItem *storage_to_item(T *t) {
-    ArenaItem *current_item = reinterpret_cast<ArenaItem *>(t);
-    return current_item;
-  }
 }; // minipool_item
 
 #endif
