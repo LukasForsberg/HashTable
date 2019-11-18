@@ -1,0 +1,54 @@
+#include "HashTable.h"
+#include <iostream>
+#include <string>
+#include <cassert>
+#include <stdlib.h>
+#include <time.h>
+#include <pthread.h>
+
+
+//----------------------------------TESTS-------------------------------------//
+
+void writeAndReadTest(int num_threads){
+
+
+  HashTable<int,int> writeTable = HashTable<int,int>(128);
+
+  pthread_t threads[num_threads];
+  randTable int[num_threads*100];
+
+  for( int i = 0; i < num_threads*100; i++ ) {
+
+    randTable[i] = rand() % 100;
+    //cout << rand() << endl;
+  }
+
+  void write(void* i){
+
+    for(int j =  100*i; j < 100*(i+1); j+){
+
+      writeTable.singleWrite(j, randTable[j]);
+
+    }
+
+  }
+
+  for( int i = 0; i < num_threads; i++ ) {
+
+    pthread_create(&threads[i], NULL, write(), (void *) i);
+  }
+
+  for( int i = 0; i < num_threads*100; i++) {
+
+    assert(table.singleRead(i) == randTable[i]);
+
+  }
+
+}
+//-----------------------------------MAIN-------------------------------------//
+
+int main(){
+
+  writeAndReadTest(10);
+
+}
