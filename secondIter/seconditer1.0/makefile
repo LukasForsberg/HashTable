@@ -24,7 +24,7 @@ LDFLAGS =   -g -pthread
 #LDFLAGS +=  -stdlib=libc++
 HASH_PROGS = HashTable.o HashNode.o Bucket.o
 # Targets
-PROGS = SingleThreadTest
+PROGS = SingleThreadTest MultipleThreadsTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
