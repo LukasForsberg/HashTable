@@ -40,6 +40,7 @@ template<class Key, class Value> class HashTable {
     size_t capacity;
     atomic<uint16_t> load;
     void rehash();
+    void *subHash(void *argStruct);
 
     bool rehash_flag;
     mutable shared_timed_mutex rehash_mutex;
