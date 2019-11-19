@@ -90,20 +90,36 @@ size_t HashTable<Key, Value>::hash_func(Key key){
 }
 
 template<class Key, class Value>
+struct arg_struct {
+    int index;
+    int chunkSize;
+    Bucket<Key,Value>* temp;
+};
+
+template<class Key, class Value>
 void HashTable<Key, Value>::rehash(){
   size_t old_capacity = capacity;
   capacity = capacity << 1;
   Bucket<Key,Value>* temp = new Bucket<Key,Value>[capacity];
-  HashNode<Key,Value>* node;
-  HashNode<Key,Value>* next;
-  for(size_t i = 0; i < old_capacity; i++){
-    node = buckets[i].getNode();
-    while(node != nullptr){
-      next = node->getNext();
-      temp[hash_func(node->getKey())].append(node);
-      node = next;
-    }
+
+  size_t no_threads = load >> 6;
+  size_t chunkSize = (double) load/no_threads;
+  pthread_t *helpThreads = new pthread_t[no_threads];
+
+  for( int i = 0; i < no_threads; i++ ) {
+
+    struct arg_struct<Key, Value> args;
+    args.index = i;
+    args.chunkSize = chunkSize;
+    args.temp = temp;
+    pthread_create(&helpThreads[i], NULL, &subHash,(void*)&args);
   }
+
+  for (int i = 0; i < no_threads; i++){
+
+       pthread_join (helpThreads[i], NULL);
+    }
+
   delete [] buckets;
   buckets = temp;
 }
@@ -168,6 +184,28 @@ void HashTable<Key,Value>::print(){
     while(node != nullptr){
       cout << "Key: " << node->getKey() << " Value: " << node->getValue() << endl;
       node = node->getNext();
+    }
+  }
+}
+
+template<class Key, class Value>
+void HashTable<Key,Value>::*subHash(void *arguments){
+
+  struct arg_struct<Key, Value> *args = arguments;
+  size_t index = args -> index;
+  size_t chunkSize = args -> chunkSize;
+  Bucket<Key,Value>* temp = args -> temp;
+  HashNode<Key,Value>* node;
+  HashNode<Key,Value>* next;
+
+  for(size_t i = chunkSize*index; i < chunkSize*(index + 1) ; i++){
+
+    node = buckets[i].getNode();
+
+      while(node != nullptr){
+        next = node->getNext();
+        temp[hash_func(node->getKey())].append(node);
+        node = next;
     }
   }
 }
