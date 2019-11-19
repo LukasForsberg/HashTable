@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pthread.h>
+#include <vector>
+#include <utility>
+
+using std::vector;
+using std::pair;
 
   int *randTable = new int[10000];
 
@@ -13,7 +18,6 @@
   HashTable<int,int> reHashTable = HashTable<int,int>(128);
 
   HashTable<int,int> spamTable = HashTable<int,int>(128);
-
 
 
 //---------------------------------HELP_FUNCTIONS----------------------------//
@@ -34,6 +38,24 @@ void *hashWrite(void *arg){
 void *spamWrite(void *arg){
   for(int i = 0; i < 10; i++){
     spamTable.singleWrite(1, spamTable.singleRead(1) + 1);
+  }
+}
+
+typedef struct mega_data{
+  HashTable<int,int>* table;
+  vector<pair<int,int>> vec;
+} mega_data;
+
+void *megaWrite(void *arg){
+  mega_data* data = (mega_data*)arg;
+  for(int i = 0; i < 100; i++){
+    int key;
+    do {
+      key = rand();
+    }while(data->table->contains(key));
+    int value = rand();
+    data->table->singleWrite(key, value);
+    data->vec.push_back(make_pair(key,value));
   }
 }
 
@@ -134,6 +156,33 @@ void spamBucketTest(){
 
 }
 
+void megaSpamTest(){
+  cout << "megaSpamTest: RUNNING..." << endl;
+  int no_threads = 10;
+  pthread_t *threads = new pthread_t[no_threads];
+  mega_data* thread_data = new mega_data[no_threads];
+  HashTable<int,int> table = HashTable<int,int>(128);
+
+  for(int i = 0; i < no_threads; i++){
+    thread_data[i].table = &table;
+  }
+
+  for( int i = 0; i < no_threads; i++ ) {
+    pthread_create(&threads[i], NULL, &megaWrite, (void*)&thread_data[i]);
+  }
+
+  for (int i = 0; i < no_threads; i++){
+       pthread_join (threads[i], NULL);
+  }
+
+  for(int i = 0; i < no_threads; i++){
+    for(auto p : thread_data[i].vec){
+      assert(table.singleRead(p.first) == p.second);
+    }
+  }
+  cout << "megaSpamTest: OK" << endl;
+}
+
 
 //-----------------------------------MAIN-------------------------------------//
 
@@ -141,7 +190,8 @@ int main(){
 
   writeAndReadTest();
   reHashTest();
-  spamBucketTest();
+  //spamBucketTest();
+  megaSpamTest();
 
 
 }

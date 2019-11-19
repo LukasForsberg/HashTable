@@ -144,6 +144,7 @@ bool HashTable<Key, Value>::contains(const Key key){
     if(node->getKey() == key){
       return true;
     }
+    node = node->getNext();
   }
   return false;
 }
