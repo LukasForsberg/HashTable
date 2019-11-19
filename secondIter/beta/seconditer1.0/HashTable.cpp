@@ -54,6 +54,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
     //check so previus capacity haven't increased.
     rehash_mutex.lock();
     if(old_capacity == capacity){
+      cout << "reHashar" << endl;
       rehash();
     }
     rehash_mutex.unlock();
