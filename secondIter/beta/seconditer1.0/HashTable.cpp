@@ -54,7 +54,6 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
     //check so previus capacity haven't increased.
     rehash_mutex.lock();
     if(old_capacity == capacity){
-      cout << "reHashar" << endl;
       rehash();
     }
     rehash_mutex.unlock();
@@ -107,11 +106,13 @@ void HashTable<Key, Value>::rehash(){
   capacity = capacity << 1;
   Bucket<Key,Value>* temp = new Bucket<Key,Value>[capacity];
   HashNode<Key,Value>* node;
+  HashNode<Key,Value>* next;
   for(size_t i = 0; i < old_capacity; i++){
     node = buckets[i].getNode();
     while(node != nullptr){
+      next = node->getNext();
       temp[hash_func(node->getKey())].append(node);
-      node = node->getNext();
+      node = next;
     }
   }
   delete [] buckets;
@@ -160,21 +161,28 @@ bool HashTable<Key, Value>::contains(const Key key){
 
 
 template<class Key, class Value>
-size_t HashTable<Key, Value>::size(){
+size_t HashTable<Key,Value>::size(){
   return load;
 }
 
 template<class Key, class Value>
-size_t HashTable<Key, Value>::getCapacity(){
+size_t HashTable<Key,Value>::getCapacity(){
   return capacity;
 }
 
 template<class Key, class Value>
-void HashTable<Key, Value>::checkFlag(shared_lock<shared_timed_mutex>& lock){
-  while(rehash_flag){
-    cv.wait(lock);
+void HashTable<Key,Value>::print(){
+  unique_lock<shared_timed_mutex> hash_lock(rehash_mutex);
+  for(size_t i = 0; i < capacity; i++){
+    cout << "index : " << i << endl;
+    auto node = buckets[i].getNode();
+    while(node != nullptr){
+      cout << "Key: " << node->getKey() << " Value: " << node->getValue() << endl;
+      node = node->getNext();
+    }
   }
 }
+
 
 
 //wtf??????
