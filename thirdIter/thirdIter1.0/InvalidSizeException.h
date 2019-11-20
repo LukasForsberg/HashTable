@@ -4,7 +4,7 @@
 #include <exception>
 
 
-struct InvalidSizeExeption : public std::exception
+struct InvalidSizeException : public std::exception
 {
 	const char * what () const throw ()
     {

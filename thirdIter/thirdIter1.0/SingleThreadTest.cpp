@@ -109,6 +109,20 @@ void test6(){
   cout << "Test 6: OK" << endl;
 }
 
+void iteratorTest(){
+  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  for(int i = 0; i < 100; i++){
+    hashTable.singleWrite(i, i);
+  }
+  int i = 0;
+  for(auto node : hashTable){
+    assert(node.getKey() == i);
+    assert(node.getValue() == i);
+    i++;
+  }
+  cout << "Iterator test: OK" << endl;
+}
+
 void performance_test1(){
   HashTable<int,int> hashTable = HashTable<int,int>(256);
   srand (time(0));
@@ -214,6 +228,7 @@ int main(){
   test4();
   test5();
   test6();
+  iteratorTest();
   cout << endl;
 
   performance_test1();

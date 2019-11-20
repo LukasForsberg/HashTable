@@ -173,9 +173,9 @@ template<class Key, class Value>
 bool HashTable<Key, Value>::contains(const Value value){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
 
-  for(size_t i = 0; i < load; i++){
+  for(size_t i = 0; i < capacity; i++){
+      std::shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
       auto node = buckets[i].getNode();
-      std::shared_lock<std::shared_timed_mutex> lock(*(node->getMutex()));
       while (node != nullptr){
         if(node->getValue() == value){
           return true;
@@ -206,7 +206,7 @@ size_t HashTable<Key,Value>::getCapacity(){
 
 template<class Key, class Value>
 bool HashTable<Key,Value>::empty(){
-  return load != 0;
+  return load == 0;
 }
 
 template<class Key, class Value>
@@ -241,8 +241,17 @@ void* HashTable<Key,Value>::subHash(void *arguments){
         node = next;
     }
   }
+  return nullptr;
+}
 
-  return NULL;
+template<class Key, class Value>
+HashTableIterator<Key,Value> HashTable<Key,Value>::begin() {
+	return HashTableIterator<Key,Value>(this);
+}
+
+template<class Key, class Value>
+HashTableIterator<Key,Value> HashTable<Key,Value>::end() {
+	return HashTableIterator<Key,Value>();
 }
 
 

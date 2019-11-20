@@ -22,8 +22,8 @@ LDFLAGS =   -g -pthread
 #CPPFLAGS += -stdlib=libc++
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS +=  -stdlib=libc++
-HASH_PROGS = HashTable.o HashNode.o  Bucket.o
-HASH_TEST_PROGS = HashTableTest.o HashNode.o  Bucket.o
+HASH_PROGS = HashTable.o HashNode.o  Bucket.o HashTableIterator.o
+HASH_TEST_PROGS = HashTableTest.o HashNode.o  Bucket.o HashTableIterator.o
 # Targets
 PROGS = SingleThreadTest MultipleThreadsTest
 all: $(PROGS)
