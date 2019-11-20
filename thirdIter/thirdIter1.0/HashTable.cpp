@@ -1,5 +1,6 @@
 #include "HashTable.h"
 #include <type_traits>
+#include <sys/sysinfo.h>
 
 template<class Key, class Value>
 HashTable<Key, Value>::HashTable(size_t size){
@@ -92,33 +93,30 @@ size_t HashTable<Key, Value>::hash_func(Key key){
 template<class Key, class Value>
 struct arg_struct {
     int index;
-    int chunkSize;
     Bucket<Key,Value>* temp;
+    HashTable<Key,Value>* table;
 };
 
 template<class Key, class Value>
 void HashTable<Key, Value>::rehash(){
-  size_t old_capacity = capacity;
+  size_t no_threads = capacity >> 6;
   capacity = capacity << 1;
   Bucket<Key,Value>* temp = new Bucket<Key,Value>[capacity];
 
-  size_t no_threads = load >> 6;
-  size_t chunkSize = (double) load/no_threads;
-  pthread_t *helpThreads = new pthread_t[no_threads];
+  thread* helpThreads = new thread[no_threads];
+  struct arg_struct<Key,Value>* args = new struct arg_struct<Key,Value>[no_threads];
 
-  for( int i = 0; i < no_threads; i++ ) {
-
-    struct arg_struct<Key, Value> args;
-    args.index = i;
-    args.chunkSize = chunkSize;
-    args.temp = temp;
-    pthread_create(&helpThreads[i], NULL, &subHash,(void*)&args);
+  for( size_t i = 0; i < no_threads; i++ ) {
+    args[i].index = i;
+    args[i].temp = temp;
+    args[i].table = this;
+    helpThreads[i] = thread(HashTable<Key,Value>::subHash, &args[i]);
   }
 
-  for (int i = 0; i < no_threads; i++){
+  for (size_t i = 0; i < no_threads; i++){
 
-       pthread_join (helpThreads[i], NULL);
-    }
+      helpThreads[i].join();
+ }
 
   delete [] buckets;
   buckets = temp;
@@ -190,22 +188,21 @@ void HashTable<Key,Value>::print(){
 }
 
 template<class Key, class Value>
-void HashTable<Key,Value>::*subHash(void *arguments){
-
-  struct arg_struct<Key, Value> *args = arguments;
-  size_t index = args -> index;
-  size_t chunkSize = args -> chunkSize;
-  Bucket<Key,Value>* temp = args -> temp;
+void* HashTable<Key,Value>::subHash(void *arguments){
+  struct arg_struct<Key, Value> *args = (arg_struct<Key,Value>*)arguments;
+  size_t index = args->index;
+  Bucket<Key,Value>* temp = args-> temp;
   HashNode<Key,Value>* node;
   HashNode<Key,Value>* next;
+  HashTable<Key,Value>* table = args->table;
 
-  for(size_t i = chunkSize*index; i < chunkSize*(index + 1) ; i++){
+  for(size_t i = 64*index; i < 64*(index + 1) ; i++){
 
-    node = buckets[i].getNode();
+    node = table->buckets[i].getNode();
 
       while(node != nullptr){
         next = node->getNext();
-        temp[hash_func(node->getKey())].append(node);
+        temp[table->hash_func(node->getKey())].append(node);
         node = next;
     }
   }

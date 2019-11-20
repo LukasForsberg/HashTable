@@ -11,7 +11,7 @@ CC  = $(CXX)
 # if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
 # -g is for debugging.
 CPPFLAGS =  -std=c++17 -I. -pthread
-CXXFLAGS = -Wall -Wextra -pedantic-errors -Wold-style-cast
+CXXFLAGS = -Wall -Wextra -pedantic-errors #-Wold-style-cast
 CXXFLAGS +=  -o3
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)

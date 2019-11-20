@@ -22,23 +22,26 @@ using std::pair;
 
 //---------------------------------HELP_FUNCTIONS----------------------------//
 
-void *write(void *arg){
+void* write(void *arg){
   for(int j =  0; j < 10; j++){
     writeTable.singleWrite(j, randTable[j]);
   }
+  return arg;
 }
 
-void *hashWrite(void *arg){
+void* hashWrite(void *arg){
   int index = *((int*)(&arg));
   for(int j =  100*(int )index; j < 100*((int) index+1); j++){
     reHashTable.singleWrite(j, randTable[j]);
   }
+  return arg;
 }
 
-void *spamWrite(void *arg){
+void* spamWrite(void *arg){
   for(int i = 0; i < 10; i++){
     spamTable.singleWrite(1, spamTable.singleRead(1) + 1);
   }
+  return arg;
 }
 
 typedef struct mega_data{
@@ -57,6 +60,7 @@ void *megaWrite(void *arg){
     data->table->singleWrite(key, value);
     data->vec.push_back(make_pair(key,value));
   }
+  return arg;
 }
 
 //----------------------------------TESTS-------------------------------------//
@@ -75,7 +79,7 @@ void writeAndReadTest(){
 
   for( int i = 0; i < no_threads; i++ ) {
 
-    pthread_create(&threads[i], NULL, &write,(void*)i);
+    pthread_create(&threads[i], NULL, &write,NULL);
   }
 
   for (int i = 0; i < no_threads; i++)
