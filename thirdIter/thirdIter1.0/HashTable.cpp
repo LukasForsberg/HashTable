@@ -2,12 +2,18 @@
 #include <type_traits>
 #include <sys/sysinfo.h>
 
+bool isPowerOfTwo (int x){
+    return x && (!(x&(x-1)));
+}
+
 template<class Key, class Value>
 HashTable<Key, Value>::HashTable(size_t size){
+  if(!isPowerOfTwo(size)){
+    throw InvalidSizeException();
+  }
   buckets = new Bucket<Key,Value>[size];
   capacity = size;
   load = 0;
-  rehash_flag = false;
 }
 
 template<class Key, class Value>

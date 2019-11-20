@@ -6,7 +6,7 @@ HashTable<Key, Value>::HashTable(size_t size){
   buckets = new Bucket<Key,Value>[size];
   capacity = size;
   load = 0;
-  rehash_flag = false;
+  core = 
 }
 
 template<class Key, class Value>

@@ -8,6 +8,8 @@
 #include "Bucket.h"
 #include <thread>
 #include <atomic>
+#include "InvalidSizeException.h"
+#include <sys/sysinfo.h>
 
 #define test (1)
 
@@ -18,6 +20,7 @@ template<class Key, class Value> class HashTable {
   public:
     HashTable(size_t size);
     ~HashTable();
+    // TODO copy constructor
 
     void singleWrite(Key key, Value value);
     Value singleRead(Key key);
@@ -27,8 +30,10 @@ template<class Key, class Value> class HashTable {
     size_t hash_func(Key key);
     void remove(Key key);
     bool contains(const Key key);
+    // TODO contains value, but has to switch them up
     void print();
-
+    // TODO make container iterable
+    // TODO bool empty() ;
 
     #if test
       struct timespec readStart, readEnd, readSum,
@@ -40,10 +45,10 @@ template<class Key, class Value> class HashTable {
     Bucket<Key,Value>* buckets;
     size_t capacity;
     atomic<uint16_t> load;
+    const uint16_t cores = get_nprocs_conf();
+
     void rehash();
     static void* subHash(void *argStruct);
-
-    bool rehash_flag;
     mutable shared_timed_mutex rehash_mutex;
 
 
