@@ -156,8 +156,9 @@ void copyTest(){
 
   strTable.singleWrite("Pelle", 44);
 
-  assume
-
+  assert(!(copyTable.contains(44)));
+  assert(copyTable.contains(96));
+  assert(copyTable.contains(85));
 
   cout << "copyTest: OK" << endl;
 }
@@ -269,6 +270,7 @@ int main(){
   containsTest();
   manualRehashTest();
   isEmptyTest();
+  copyTest();
 
 
   cout << endl;
