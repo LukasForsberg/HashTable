@@ -4,9 +4,9 @@
 using std::string;
 
 template<class Key, class Value>
-HashNode<Key, Value>::HashNode(Key& k, Value& val){
-  key = k;
-  value = val;
+HashNode<Key, Value>::HashNode(Key k, Value val){
+  key = std::move(k);
+  value = std::move(val);
   next = nullptr;
 }
 
@@ -21,8 +21,8 @@ Value HashNode<Key, Value>::getValue(){
 }
 
 template<class Key, class Value>
-void HashNode<Key, Value>::setValue(Value &val){
-  value = val;
+void HashNode<Key, Value>::setValue(Value val){
+  value = std::move(val);
 }
 
 template<class Key, class Value>

@@ -24,8 +24,7 @@ template<class Key, class Value> class HashTable {
   public:
     HashTable(size_t size);
     ~HashTable();
-    // TODO copy constructor
-
+    HashTable(const HashTable<Key, Value> &table);
     void singleWrite(Key key, Value value);
     Value singleRead(Key key);
 
@@ -36,7 +35,6 @@ template<class Key, class Value> class HashTable {
     bool contains(const Value value);
     bool containsKey(const Key key);
     void print();
-    // TODO make container iterable
     bool empty();
     void rehash();
 
