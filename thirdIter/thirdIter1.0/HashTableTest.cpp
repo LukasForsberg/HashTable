@@ -6,7 +6,7 @@ HashTable<Key, Value>::HashTable(size_t size){
   buckets = new Bucket<Key,Value>[size];
   capacity = size;
   load = 0;
-  core = 
+//  cores =
 }
 
 template<class Key, class Value>
@@ -65,7 +65,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
     //check so previus capacity haven't increased.
     rehash_mutex.lock();
     if(old_capacity == capacity){
-      rehash();
+      privateRehash();
     }
     rehash_mutex.unlock();
   }
@@ -121,7 +121,7 @@ size_t HashTable<Key, Value>::hash_func(Key key){
 }
 
 template<class Key, class Value>
-void HashTable<Key, Value>::rehash(){
+void HashTable<Key, Value>::privateRehash(){
   #if test
     clock_gettime(CLOCK_REALTIME, &rehashStart);
   #endif
@@ -173,7 +173,7 @@ void HashTable<Key, Value>::remove(Key key){
 }
 
 template<class Key, class Value>
-bool HashTable<Key, Value>::contains(const Key key){
+bool HashTable<Key, Value>::containsKey(const Key key){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
   Bucket<Key,Value>* bucket = &buckets[hash_func(key)];
   auto node = bucket->getNode();
@@ -182,10 +182,35 @@ bool HashTable<Key, Value>::contains(const Key key){
     if(node->getKey() == key){
       return true;
     }
+    node = node->getNext();
   }
   return false;
 }
 
+template<class Key, class Value>
+bool HashTable<Key, Value>::contains(const Value value){
+  shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+
+  for(size_t i = 0; i < load; i++){
+      auto node = buckets[i].getNode();
+      std::shared_lock<std::shared_timed_mutex> lock(*(node->getMutex()));
+      while (node != nullptr){
+        if(node->getValue() == value){
+          return true;
+        }
+        node = node->getNext();
+      }
+  }
+
+  return false;
+}
+
+template<class Key, class Value>
+void HashTable<Key,Value>::rehash(){
+  rehash_mutex.lock();
+  privateRehash();
+  rehash_mutex.unlock();
+}
 
 template<class Key, class Value>
 size_t HashTable<Key,Value>::size(){

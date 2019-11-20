@@ -29,11 +29,12 @@ template<class Key, class Value> class HashTable {
     size_t getCapacity();
     size_t hash_func(Key key);
     void remove(Key key);
-    bool contains(const Key key);
-    // TODO contains value, but has to switch them up
+    bool contains(const Value value);
+    bool containsKey(const Key key);
     void print();
     // TODO make container iterable
-    // TODO bool empty() ;
+    bool empty();
+    void rehash();
 
     #if test
       struct timespec readStart, readEnd, readSum,
@@ -42,16 +43,17 @@ template<class Key, class Value> class HashTable {
     #endif
 
   private:
+
+    //attributes
     Bucket<Key,Value>* buckets;
     size_t capacity;
     atomic<uint16_t> load;
     const uint16_t cores = get_nprocs_conf();
-
-    void rehash();
-    static void* subHash(void *argStruct);
     mutable shared_timed_mutex rehash_mutex;
 
-
+    //help functions
+    void privateRehash();
+    static void* subHash(void *argStruct);
 
 };
 
