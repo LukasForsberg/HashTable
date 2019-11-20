@@ -32,6 +32,26 @@ HashTable<Key, Value>::~HashTable(){
 }
 
 template<class Key, class Value>
+HashTable<Key, Value>::HashTable(const HashTable<Key, Value> &table){
+
+  buckets = new Bucket<Key,Value>[table.capacity];
+  load = table.load.load(memory_order_relaxed);
+  capacity = table.capacity;
+
+  for(size_t i = 0; i < capacity; i++){
+
+    auto node = table.buckets[i].getNode();
+
+    while(node != nullptr){
+
+      HashNode<Key, Value>* freshNode = new HashNode<Key, Value>(node->getKey(), node->getValue());
+      buckets[i].append(freshNode);
+      node = node->getNext();
+    }
+  }
+}
+
+template<class Key, class Value>
 void HashTable<Key, Value>::singleWrite(Key key, Value value){
   {
     shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
@@ -173,9 +193,9 @@ template<class Key, class Value>
 bool HashTable<Key, Value>::contains(const Value value){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
 
-  for(size_t i = 0; i < load; i++){
+  for(size_t i = 0; i < capacity; i++){
+    std::shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
       auto node = buckets[i].getNode();
-      std::shared_lock<std::shared_timed_mutex> lock(*(node->getMutex()));
       while (node != nullptr){
         if(node->getValue() == value){
           return true;
@@ -206,7 +226,7 @@ size_t HashTable<Key,Value>::getCapacity(){
 
 template<class Key, class Value>
 bool HashTable<Key,Value>::empty(){
-  return load != 0;
+  return load == 0;
 }
 
 template<class Key, class Value>

@@ -20,8 +20,7 @@ template<class Key, class Value> class HashTable {
   public:
     HashTable(size_t size);
     ~HashTable();
-    // TODO copy constructor
-
+    HashTable(const HashTable<Key, Value> &table);
     void singleWrite(Key key, Value value);
     Value singleRead(Key key);
 

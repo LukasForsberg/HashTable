@@ -109,6 +109,59 @@ void test6(){
   cout << "Test 6: OK" << endl;
 }
 
+void containsTest(){
+
+  HashTable<string,int> strTable = HashTable<string,int>(128);
+
+  strTable.singleWrite("Edvin", 2);
+
+  assert(strTable.containsKey("Edvin"));
+  assert(strTable.contains(2));
+
+  cout << "ContainsTest: OK" << endl;
+}
+
+void isEmptyTest(){
+
+  HashTable<string,int> strTable = HashTable<string,int>(128);
+
+  assert(strTable.empty());
+
+  cout << "isEmptyTest: OK" << endl;
+}
+
+void manualRehashTest(){
+
+  HashTable<string,int> strTable = HashTable<string,int>(128);
+
+  strTable.rehash();
+
+  assert(strTable.getCapacity() == 128*2);
+
+  strTable.rehash();
+
+  assert(strTable.getCapacity() == 128*4);
+
+  cout << "manualRehashTest: OK" << endl;
+}
+
+void copyTest(){
+
+  HashTable<string,int> strTable = HashTable<string,int>(128);
+
+  strTable.singleWrite("Edvin", 96);
+  strTable.singleWrite("Lukas", 85);
+
+  HashTable<string,int> copyTable = strTable;
+
+  strTable.singleWrite("Pelle", 44);
+
+  assume
+
+
+  cout << "copyTest: OK" << endl;
+}
+
 void performance_test1(){
   HashTable<int,int> hashTable = HashTable<int,int>(256);
   srand (time(0));
@@ -144,7 +197,6 @@ void performance_test2(){
 }
 
 void performance_test3(){
-  cout << "started test 3 " << endl;
   HashTable<int,int> hashTable = HashTable<int,int>(64);
   srand (time(0));
   struct timespec start, end;
@@ -214,6 +266,11 @@ int main(){
   test4();
   test5();
   test6();
+  containsTest();
+  manualRehashTest();
+  isEmptyTest();
+
+
   cout << endl;
 
   performance_test1();
