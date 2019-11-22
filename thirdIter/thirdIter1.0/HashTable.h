@@ -11,12 +11,13 @@
 #include "InvalidSizeException.h"
 #include <sys/sysinfo.h>
 #include "HashTableIterator.h"
+#include <vector>
+
+using namespace std;
 
 template<class Key, class Value> class HashTableIterator;
 
 #define test (1)
-
-using namespace std;
 
 template<class Key, class Value> class HashTable {
   friend class HashTableIterator<Key,Value>;
@@ -32,7 +33,8 @@ template<class Key, class Value> class HashTable {
     size_t getCapacity();
     size_t hash_func(Key key);
     void remove(Key key);
-    bool contains(const Value value);
+    bool contains(const Value value); // TODO: this could be parallised
+    vector<Key> getKeys(const Value value); // TODO: this could be parallised
     bool containsKey(const Key key);
     void print();
     bool empty();

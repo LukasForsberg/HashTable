@@ -51,7 +51,7 @@ typedef struct mega_data{
 
 void *megaWrite(void *arg){
   mega_data* data = (mega_data*)arg;
-  for(int i = 0; i < 100; i++){
+  for(int i = 0; i < 1000; i++){
     int key;
     do {
       key = rand();
