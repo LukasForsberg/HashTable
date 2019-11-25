@@ -118,21 +118,44 @@ size_t HashTable<Key, Value>::hash_func(Key key){
 
 template<class Key, class Value>
 struct arg_struct {
+    size_t chunkSize;
     int index;
     Bucket<Key,Value>* temp;
     HashTable<Key,Value>* table;
+
 };
 
 template<class Key, class Value>
 void HashTable<Key, Value>::privateRehash(){
-  size_t no_threads = capacity >> 6;
+  cout << "REHASH..." << endl;
+  size_t no_threads;
+  size_t chunkSize;
+
+  if(cores < (capacity >> 6)){
+
+    no_threads = cores;
+    chunkSize = capacity / cores;
+  } else {
+
+     if(capacity >= 64){
+       chunkSize = 64;
+       no_threads = capacity >> 6;
+
+     } else {
+       chunkSize = capacity;
+       no_threads = 1;
+
+     }
+  }
+
+
   capacity = capacity << 1;
   Bucket<Key,Value>* temp = new Bucket<Key,Value>[capacity];
-
   thread* helpThreads = new thread[no_threads];
   struct arg_struct<Key,Value>* args = new struct arg_struct<Key,Value>[no_threads];
 
   for( size_t i = 0; i < no_threads; i++ ) {
+    args[i].chunkSize = chunkSize;
     args[i].index = i;
     args[i].temp = temp;
     args[i].table = this;
@@ -146,6 +169,11 @@ void HashTable<Key, Value>::privateRehash(){
 
   delete [] buckets;
   buckets = temp;
+  delete [] helpThreads;
+  delete [] args;
+
+  cout << "...FINISHED" << endl;
+
 }
 
 template<class Key, class Value>
@@ -246,18 +274,20 @@ template<class Key, class Value>
 void* HashTable<Key,Value>::subHash(void *arguments){
   struct arg_struct<Key, Value> *args = (arg_struct<Key,Value>*)arguments;
   size_t index = args->index;
+  size_t chunkSize = args->chunkSize;
   Bucket<Key,Value>* temp = args-> temp;
   HashNode<Key,Value>* node;
   HashNode<Key,Value>* next;
   HashTable<Key,Value>* table = args->table;
 
-  for(size_t i = 64*index; i < 64*(index + 1) ; i++){
+  for(size_t i = chunkSize*index; i < chunkSize*(index + 1) ; i++){
 
     node = table->buckets[i].getNode();
 
       while(node != nullptr){
         next = node->getNext();
         temp[table->hash_func(node->getKey())].append(node);
+
         node = next;
     }
   }

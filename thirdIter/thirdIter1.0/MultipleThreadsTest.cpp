@@ -17,7 +17,7 @@ using std::pair;
 
   HashTable<int,int> reHashTable = HashTable<int,int>(128);
 
-  HashTable<int,int> spamTable = HashTable<int,int>(128);
+  HashTable<int,int> spamTable = HashTable<int,int>(256);
 
 
 //---------------------------------HELP_FUNCTIONS----------------------------//
@@ -40,6 +40,7 @@ void* hashWrite(void *arg){
 void* spamWrite(void *arg){
   for(int i = 0; i < 10; i++){
     spamTable.singleWrite(1, spamTable.singleRead(1) + 1);
+
   }
   return arg;
 }
@@ -154,6 +155,7 @@ void spamBucketTest(){
     }
 
 
+  cout << spamTable.singleRead(1) << endl;
   assert(spamTable.singleRead(1) == 10*no_threads);
 
   cout << "spamBucketTest: OK" << endl;
@@ -194,7 +196,7 @@ int main(){
 
   writeAndReadTest();
   reHashTest();
-  //spamBucketTest();
+  spamBucketTest();
   megaSpamTest();
 
 
