@@ -83,7 +83,6 @@ void writeAndReadTest(){
   cout << "writeAndRead: RUNNING..." << endl;
 
   int no_threads = 5;
-
   pthread_t *threads = new pthread_t[no_threads];
 
   for( int i = 0; i < no_threads*10; i++ ) {
@@ -103,15 +102,11 @@ void writeAndReadTest(){
   }
   delete [] threads;
   cout << "writeAndReadTest: OK" << endl;
-
-
 }
 
-//PASSES SOMETIMES?? --> NOT THREADSAFE
 void reHashTest(){
 
   cout << "reHashTest: RUNNING..." << endl;
-
   int no_threads = 10;
   pthread_t *threads = new pthread_t[no_threads];
 
@@ -132,10 +127,8 @@ void reHashTest(){
   }
   delete [] threads;
   cout << "rehashTest: OK" << endl;
-
 }
 
-//NEVER PASSES (INVALID READ EXCEPTION)
 void spamBucketTest(){
 
   cout << "spamBucketTest: RUNNING..." << endl;
@@ -211,6 +204,44 @@ void megaSpamTest(){
   delete [] threads;
   delete [] thread_data;
   cout << "megaSpamTest: OK" << endl;
+}
+
+void writeReadDeleteTest(){
+  cout << "writeReadDeleteTest: RUNNING..." << endl;
+  int no_threads = 12;
+  int no_write_threads = no_threads/2;
+  int no_read_threads = no_threads/3;
+  int no_delete_threads = no_threads/6;
+  pthread_t *w_threads = new pthread_t[no_write_threads];
+  pthread_t *r_threads = new pthread_t[no_read_threads];
+  pthread_t *d_threads = new pthread_t[no_delete_threads];
+
+  mega_data* thread_data = new mega_data[no_write_threads + no_delete_threads];
+  HashTable<int,int> table = HashTable<int,int>(128);
+
+  for(int i = 0; i < no_write_threads + no_delete_threads; i++){
+    thread_data[i].table = &table;
+  }
+
+  for( int i = 0; i < no_write_threads; i++ ) {
+    pthread_create(&threads[i], NULL, &megaWrite, (void*)&thread_data[i]);
+  }
+  for( int i = 0; i < no_write_threads; i++ ) {
+    pthread_create(&threads[i + no_read_threads], NULL, &megaRead, (void*)&table);
+  }
+  for( int i = 0; i < no_write_threads; i++ ) {
+    pthread_create(&threads[i + no_read_threads], NULL, &megaRead, (void*)&table);
+  }
+
+
+  for (int i = 0; i < no_threads; i++){
+      pthread_join (threads[i], NULL);
+  }
+
+  delete [] w_threads;
+  delete [] r_threads;
+  delete [] d_threads;
+  delete [] thread_data;
 }
 
 
