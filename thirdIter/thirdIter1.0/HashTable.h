@@ -10,12 +10,17 @@
 #include <atomic>
 #include "InvalidSizeException.h"
 #include <sys/sysinfo.h>
-
-#define test (1)
+#include "HashTableIterator.h"
+#include <vector>
 
 using namespace std;
 
+template<class Key, class Value> class HashTableIterator;
+
+#define test (1)
+
 template<class Key, class Value> class HashTable {
+  friend class HashTableIterator<Key,Value>;
 
   public:
     HashTable(size_t size);
@@ -28,12 +33,15 @@ template<class Key, class Value> class HashTable {
     size_t getCapacity();
     size_t hash_func(Key key);
     void remove(Key key);
-    bool contains(const Value value);
+    bool contains(const Value value); // TODO: this could be parallised
+    vector<Key> getKeys(const Value value); // TODO: this could be parallised
     bool containsKey(const Key key);
     void print();
-    // TODO make container iterable
     bool empty();
     void rehash();
+
+    HashTableIterator<Key,Value> begin();
+	  HashTableIterator<Key,Value> end();
 
     #if test
       struct timespec readStart, readEnd, readSum,

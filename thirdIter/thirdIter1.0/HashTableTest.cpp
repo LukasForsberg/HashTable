@@ -6,7 +6,6 @@ HashTable<Key, Value>::HashTable(size_t size){
   buckets = new Bucket<Key,Value>[size];
   capacity = size;
   load = 0;
-//  cores =
 }
 
 template<class Key, class Value>

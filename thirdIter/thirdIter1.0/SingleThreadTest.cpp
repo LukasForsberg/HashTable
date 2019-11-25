@@ -163,6 +163,30 @@ void copyTest(){
   cout << "copyTest: OK" << endl;
 }
 
+void getKeysTest(){
+  HashTable<string,int> strTable = HashTable<string,int>(128);
+
+  strTable.singleWrite("Marx",50);
+  strTable.singleWrite("Lenin",50);
+  strTable.singleWrite("Gorbatjov",50);
+  strTable.singleWrite("Smith",51);
+  strTable.singleWrite("Thatcher",49);
+  strTable.singleWrite("Reagan",48);
+
+  vector<string> commies = strTable.getKeys(50);
+  int nbr_of_commies = 0;
+  for(size_t i = 0; i <commies.size(); i++){
+    if(commies[i] == "Marx" || commies[i] == "Lenin" || commies[i] == "Gorbatjov"){
+       nbr_of_commies++;
+    }
+    if(commies[i] == "Smith" || commies[i] == "Thatcher" || commies[i] == "Reagan"){
+      assert(false);
+    }
+  }
+  assert(nbr_of_commies == 3);
+  cout << "getKeysTest: OK" << endl;
+}
+
 void performance_test1(){
   HashTable<int,int> hashTable = HashTable<int,int>(256);
   srand (time(0));
@@ -178,6 +202,20 @@ void performance_test1(){
   clock_gettime(CLOCK_REALTIME, &end);
   //double time_spent = (end.tv_sec - start.tv_sec) +
   cout << "Performance Test 1: init size 256 took: " << (end.tv_nsec - start.tv_nsec) << endl;
+}
+
+void iteratorTest(){
+  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  for(int i = 0; i < 100; i++){
+    hashTable.singleWrite(i, i);
+  }
+  int i = 0;
+  for(auto node : hashTable){
+    assert(node.getKey() == i);
+    assert(node.getValue() == i);
+    i++;
+  }
+  cout << "Iterator test: OK" << endl;
 }
 
 void performance_test2(){
@@ -267,10 +305,13 @@ int main(){
   test4();
   test5();
   test6();
+
+  iteratorTest();
   containsTest();
   manualRehashTest();
   isEmptyTest();
   copyTest();
+  getKeysTest();
 
 
   cout << endl;

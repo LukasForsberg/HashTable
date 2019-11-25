@@ -33,17 +33,14 @@ HashTable<Key, Value>::~HashTable(){
 
 template<class Key, class Value>
 HashTable<Key, Value>::HashTable(const HashTable<Key, Value> &table){
-
+  unique_lock<std::shared_timed_mutex> hash_lock(table.rehash_mutex);
   buckets = new Bucket<Key,Value>[table.capacity];
   load = table.load.load(memory_order_relaxed);
   capacity = table.capacity;
 
   for(size_t i = 0; i < capacity; i++){
-
     auto node = table.buckets[i].getNode();
-
     while(node != nullptr){
-
       HashNode<Key, Value>* freshNode = new HashNode<Key, Value>(node->getKey(), node->getValue());
       buckets[i].append(freshNode);
       node = node->getNext();
@@ -74,7 +71,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
       }
     }
   }
-  // this is actually 3 times faster!!! equal to load/capacity > 0.625
+  // equal to load/capacity > 0.625
   if(load.load(memory_order_relaxed) > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
     // exsclusive lock,
     size_t old_capacity = capacity;
@@ -220,7 +217,6 @@ bool HashTable<Key, Value>::containsKey(const Key key){
 template<class Key, class Value>
 bool HashTable<Key, Value>::contains(const Value value){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
-
   for(size_t i = 0; i < capacity; i++){
     std::shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
       auto node = buckets[i].getNode();
@@ -231,8 +227,24 @@ bool HashTable<Key, Value>::contains(const Value value){
         node = node->getNext();
       }
   }
-
   return false;
+}
+
+template<class Key, class Value>
+vector<Key> HashTable<Key, Value>::getKeys(const Value value){
+  shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+  vector<Key> v;
+  for(size_t i = 0; i < capacity; i++){
+    std::shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
+      auto node = buckets[i].getNode();
+      while (node != nullptr){
+        if(node->getValue() == value){
+          v.push_back(node->getKey());
+        }
+        node = node->getNext();
+      }
+  }
+  return v;
 }
 
 template<class Key, class Value>
@@ -291,8 +303,17 @@ void* HashTable<Key,Value>::subHash(void *arguments){
         node = next;
     }
   }
+  return nullptr;
+}
 
-  return NULL;
+template<class Key, class Value>
+HashTableIterator<Key,Value> HashTable<Key,Value>::begin() {
+	return HashTableIterator<Key,Value>(this);
+}
+
+template<class Key, class Value>
+HashTableIterator<Key,Value> HashTable<Key,Value>::end() {
+	return HashTableIterator<Key,Value>();
 }
 
 
