@@ -16,9 +16,8 @@ CXXFLAGS +=  -o3
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
 LDFLAGS =   -g -pthread
-#<<<<<<< HEAD:lab3/Makefile
+
 #LDLIBS = -llab1
-#>>>>>>> 66f8aecc57cd547e4d720bb76d2dc5643db909ab:Makefile
 #CPPFLAGS += -stdlib=libc++
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS +=  -stdlib=libc++

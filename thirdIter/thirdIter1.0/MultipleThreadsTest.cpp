@@ -207,9 +207,9 @@ void megaSpamTest(){
 
 int main(){
 
-  //writeAndReadTest();
-  //reHashTest();
-  //spamBucketTest();
+  writeAndReadTest();
+  reHashTest();
+  spamBucketTest();
   megaSpamTest();
 
 

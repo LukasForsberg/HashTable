@@ -56,7 +56,7 @@ template<class Key, class Value> class HashTable {
     Bucket<Key,Value>* buckets;
     size_t capacity;
     atomic<uint16_t> load;
-    const uint16_t cores = get_nprocs_conf();
+    const size_t cores = get_nprocs_conf();
     mutable shared_timed_mutex rehash_mutex;
     atomic_flag rehash_flag = ATOMIC_FLAG_INIT;
 
