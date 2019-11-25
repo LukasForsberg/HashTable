@@ -28,6 +28,7 @@ template<class Key, class Value> class HashTable {
     HashTable(const HashTable<Key, Value> &table);
     void singleWrite(Key key, Value value);
     Value singleRead(Key key);
+    bool readAndWrite(Key key, Value new_val, Value old_val);
 
     size_t size();
     size_t getCapacity();
@@ -57,6 +58,7 @@ template<class Key, class Value> class HashTable {
     atomic<uint16_t> load;
     const uint16_t cores = get_nprocs_conf();
     mutable shared_timed_mutex rehash_mutex;
+    atomic_flag rehash_flag = ATOMIC_FLAG_INIT;
 
     //help functions
     void privateRehash();

@@ -56,7 +56,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
     auto bucket = &buckets[index];
     auto node = bucket->getNode();
     {
-      std::unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+      unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
       while(node != nullptr){
         if(key == node->getKey()){
            node->setValue(value);
@@ -70,17 +70,47 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
         load.fetch_add(1, std::memory_order_relaxed);
       }
     }
+
   }
+
   // equal to load/capacity > 0.625
   if(load.load(memory_order_relaxed) > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
     // exsclusive lock,
-    size_t old_capacity = capacity;
-    //check so previus capacity haven't increased.
-    rehash_mutex.lock();
-    if(old_capacity == capacity){
+    if(!rehash_flag.test_and_set(memory_order_relaxed)){
+      //check so previus capacity haven't increased.
+      rehash_mutex.lock();
       privateRehash();
+      rehash_mutex.unlock();
+      rehash_flag.clear();
     }
-    rehash_mutex.unlock();
+  }
+}
+
+template<class Key, class Value>
+bool HashTable<Key, Value>::readAndWrite(Key key, Value new_val, Value old_val){
+  shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+  size_t index = hash_func(key);
+  auto bucket = &buckets[index];
+  auto node = bucket->getNode();
+  {
+    unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+    if (node == nullptr){
+      return false;
+    } else {
+      do{
+        if(key == node->getKey()){
+          if(node->getValue() == old_val){
+            node->setValue(new_val);
+            return true;
+          }
+          else {
+            return false;
+          }
+        }
+        node = node->getNext();
+      } while(node != nullptr);
+        return false;
+      }
   }
 }
 
@@ -91,7 +121,7 @@ Value HashTable<Key, Value>::singleRead(Key key){
   auto bucket = &buckets[index];
   auto node = bucket->getNode();
   {
-    std::shared_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+    shared_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
     if (node == nullptr){
       throw InvalidReadExeption();
     } else {
@@ -129,7 +159,7 @@ void HashTable<Key, Value>::privateRehash(){
   thread* helpThreads = new thread[no_threads];
   struct arg_struct<Key,Value>* args = new struct arg_struct<Key,Value>[no_threads];
 
-  for( size_t i = 0; i < no_threads; i++ ) {
+  for( size_t i = 0; i < no_threads; i++ ){
     args[i].index = i;
     args[i].temp = temp;
     args[i].table = this;
@@ -137,7 +167,6 @@ void HashTable<Key, Value>::privateRehash(){
   }
 
   for (size_t i = 0; i < no_threads; i++){
-
       helpThreads[i].join();
  }
 
@@ -207,7 +236,7 @@ vector<Key> HashTable<Key, Value>::getKeys(const Value value){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
   vector<Key> v;
   for(size_t i = 0; i < capacity; i++){
-    std::shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
+  shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
       auto node = buckets[i].getNode();
       while (node != nullptr){
         if(node->getValue() == value){

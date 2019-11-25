@@ -17,7 +17,7 @@ using std::pair;
 
   HashTable<int,int> reHashTable = HashTable<int,int>(128);
 
-  HashTable<int,int> spamTable = HashTable<int,int>(128);
+  HashTable<int,int> spamTable = HashTable<int,int>(256);
 
 
 //---------------------------------HELP_FUNCTIONS----------------------------//
@@ -38,8 +38,9 @@ void* hashWrite(void *arg){
 }
 
 void* spamWrite(void *arg){
-  for(int i = 0; i < 10; i++){
-    spamTable.singleWrite(1, spamTable.singleRead(1) + 1);
+  int index = (*(int*)arg);
+  for(int i = 0; i < 100; i++){
+    spamTable.singleWrite(4096*( i+ index*100), 4096*( i+ index*100));
   }
   return arg;
 }
@@ -140,12 +141,11 @@ void spamBucketTest(){
 
 
   int no_threads = 10;
-  spamTable.singleWrite(1, 0);
   pthread_t *threads = new pthread_t[no_threads];
-
-  for( int i = 0; i < no_threads; i++ ) {
-
-    pthread_create(&threads[i], NULL, &spamWrite, (void*)i);
+  int* index = new int[10];
+  for(int i = 0; i < no_threads; i++ ) {
+    index[i] = i;
+    pthread_create(&threads[i], NULL, &spamWrite, (void*)&index[i]);
   }
 
   for (int i = 0; i < no_threads; i++)
@@ -153,8 +153,9 @@ void spamBucketTest(){
        pthread_join (threads[i], NULL);
     }
 
-
-  assert(spamTable.singleRead(1) == 10*no_threads);
+  for(int i = 0; i < 100; i++){
+    assert(spamTable.singleRead(i*4096) == i*4096);
+  }
 
   cout << "spamBucketTest: OK" << endl;
 
@@ -176,11 +177,25 @@ void megaSpamTest(){
   }
 
   for (int i = 0; i < no_threads; i++){
-       pthread_join (threads[i], NULL);
+      pthread_join (threads[i], NULL);
   }
-
+  int count = 0;
   for(int i = 0; i < no_threads; i++){
     for(auto p : thread_data[i].vec){
+      if(table.singleRead(p.first) != p.second){
+        for(int j = 0; j < no_threads; j++){
+          for(auto p2 : thread_data[j].vec){
+            if(p.first == p2.first){
+              // if two keys is by chance equal
+              count++;
+            }
+          }
+        }
+        if(count > 1){
+          count = 0;
+          continue;
+        }
+      }
       assert(table.singleRead(p.first) == p.second);
     }
   }
@@ -192,8 +207,8 @@ void megaSpamTest(){
 
 int main(){
 
-  writeAndReadTest();
-  reHashTest();
+  //writeAndReadTest();
+  //reHashTest();
   //spamBucketTest();
   megaSpamTest();
 
