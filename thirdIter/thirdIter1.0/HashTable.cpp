@@ -146,6 +146,9 @@ struct arg_struct {
 
 template<class Key, class Value>
 void HashTable<Key, Value>::privateRehash(){
+
+  clock_gettime(CLOCK_REALTIME, &hashStart);
+
   size_t no_threads;
   size_t chunkSize;
 
@@ -183,6 +186,9 @@ void HashTable<Key, Value>::privateRehash(){
   buckets = temp;
   delete [] helpThreads;
   delete [] args;
+
+  clock_gettime(CLOCK_REALTIME, &hashEnd);
+  hashSum.tv_nsec = hashSum.tv_nsec + hashEnd.tv_nsec - hashStart.tv_nsec;
 }
 
 template<class Key, class Value>

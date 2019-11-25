@@ -135,13 +135,13 @@ void writeAndReadTest(){
 
   }
 
+  delete [] threads;
+
   clock_gettime(CLOCK_REALTIME, &endTest);
 
   cout << "Total test time:   " << (endTest.tv_nsec - startTest.tv_nsec) << endl;
   cout << "Rehash time:       " << reHashTable.hashSum.tv_nsec << endl;
   cout << "rehashTest: OK" << endl;
-
-
 
 }
 

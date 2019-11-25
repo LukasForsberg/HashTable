@@ -47,7 +47,8 @@ template<class Key, class Value> class HashTable {
     #if test
       struct timespec readStart, readEnd, readSum,
         writeStart, writeEnd,writeSum ,funcStart, funcEnd, funcSum,
-        rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum;
+        rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum,
+        hashStart, hashEnd, hashSum;
     #endif
 
   private:

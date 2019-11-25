@@ -110,6 +110,12 @@ void writeAndReadTest(){
 //PASSES SOMETIMES?? --> NOT THREADSAFE
 void reHashTest(){
 
+  reHashTable.hashSum.tv_nsec = 0;
+  struct timespec startTest, endTest;
+  srand (time(0));
+  clock_gettime(CLOCK_REALTIME, &startTest);
+
+
   cout << "reHashTest: RUNNING..." << endl;
 
   int no_threads = 10;
@@ -131,8 +137,12 @@ void reHashTest(){
     assert(reHashTable.singleRead(i) == randTable[i]);
   }
   delete [] threads;
-  cout << "rehashTest: OK" << endl;
 
+  clock_gettime(CLOCK_REALTIME, &endTest);
+
+  cout << "Total test time:   " << (endTest.tv_nsec - startTest.tv_nsec) << endl;
+  cout << "Rehash time:       " << reHashTable.hashSum.tv_nsec << endl;
+  cout << "rehashTest: OK" << endl;
 }
 
 //NEVER PASSES (INVALID READ EXCEPTION)
@@ -218,10 +228,10 @@ void megaSpamTest(){
 
 int main(){
 
-  writeAndReadTest();
+  //writeAndReadTest();
   reHashTest();
-  spamBucketTest();
-  megaSpamTest();
-  delete [] randTable;
+  //spamBucketTest();
+  //megaSpamTest();
+  //delete [] randTable;
 
 }
