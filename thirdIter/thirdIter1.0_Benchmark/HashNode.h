@@ -1,0 +1,25 @@
+#ifndef HASHNODE_H
+#define HASHNODE_H
+
+#include <memory>
+
+template<class Key, class Value> class HashNode{
+
+public:
+
+  HashNode(Key key, Value value);
+  Key getKey();
+  Value getValue();
+  void insertNext(HashNode<Key, Value>* next_node);
+  void setValue(Value value);
+  HashNode<Key, Value>* getNext();
+
+private:
+
+  HashNode<Key, Value>* next;
+  Key key;
+  Value value;
+
+};
+
+#endif
