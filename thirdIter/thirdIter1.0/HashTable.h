@@ -33,7 +33,7 @@ template<class Key, class Value> class HashTable {
     size_t size();
     size_t getCapacity();
     size_t hash_func(Key key);
-    void remove(Key key);
+    bool remove(Key key);
     bool contains(const Value value); // TODO: this could be parallised
     vector<Key> getKeys(const Value value); // TODO: this could be parallised
     bool containsKey(const Key key);

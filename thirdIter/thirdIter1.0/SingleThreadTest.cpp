@@ -204,20 +204,6 @@ void performance_test1(){
   cout << "Performance Test 1: init size 256 took: " << (end.tv_nsec - start.tv_nsec) << endl;
 }
 
-void iteratorTest(){
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
-  for(int i = 0; i < 100; i++){
-    hashTable.singleWrite(i, i);
-  }
-  int i = 0;
-  for(auto node : hashTable){
-    assert(node.getKey() == i);
-    assert(node.getValue() == i);
-    i++;
-  }
-  cout << "Iterator test: OK" << endl;
-}
-
 void performance_test2(){
   HashTable<int,int> hashTable = HashTable<int,int>(128);
   srand (time(0));
@@ -306,7 +292,6 @@ int main(){
   test5();
   test6();
 
-  iteratorTest();
   containsTest();
   manualRehashTest();
   isEmptyTest();

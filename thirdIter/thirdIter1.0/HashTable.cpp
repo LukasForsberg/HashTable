@@ -56,7 +56,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
     auto bucket = &buckets[hash_func(key)];
     HashNode<Key,Value>* node;
     {
-      unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+      unique_lock<shared_timed_mutex> lock(*(bucket->getMutex()));
       node = bucket->getNode();
       while(node != nullptr){
         if(key == node->getKey()){
@@ -75,9 +75,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
 
   // equal to load/capacity > 0.625
   if(load.load(memory_order_relaxed) > ( (capacity >> 1) + (capacity >> 2) - (capacity >> 3) ) ){
-    // exsclusive lock,
     if(!rehash_flag.test_and_set(memory_order_relaxed)){
-      //check so previus capacity haven't increased.
       rehash_mutex.lock();
       privateRehash();
       rehash_mutex.unlock();
@@ -116,7 +114,7 @@ Value HashTable<Key, Value>::singleRead(Key key){
   auto bucket = &buckets[hash_func(key)];
   HashNode<Key,Value>* node;
   {
-    shared_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+    shared_lock<shared_timed_mutex> lock(*(bucket->getMutex()));
     node = bucket->getNode();
     while(node != nullptr){
       if(key == node->getKey()){
@@ -141,13 +139,10 @@ struct arg_struct {
     int index;
     Bucket<Key,Value>* temp;
     HashTable<Key,Value>* table;
-
 };
 
 template<class Key, class Value>
 void HashTable<Key, Value>::privateRehash(){
-
-  clock_gettime(CLOCK_REALTIME, &hashStart);
 
   size_t no_threads;
   size_t chunkSize;
@@ -186,13 +181,10 @@ void HashTable<Key, Value>::privateRehash(){
   buckets = temp;
   delete [] helpThreads;
   delete [] args;
-
-  clock_gettime(CLOCK_REALTIME, &hashEnd);
-  hashSum.tv_nsec = hashSum.tv_nsec + hashEnd.tv_nsec - hashStart.tv_nsec;
 }
 
 template<class Key, class Value>
-void HashTable<Key, Value>::remove(Key key){
+bool HashTable<Key, Value>::remove(Key key){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
   auto index = hash_func(key);
   Bucket<Key,Value>* bucket = &buckets[index];
@@ -210,12 +202,13 @@ void HashTable<Key, Value>::remove(Key key){
         }
         load.fetch_sub(1, std::memory_order_relaxed);
         delete node;
-        return;
+        return true;
       }
       prev_node = node;
       node = node->getNext();
     }
   }
+  return false;
 }
 
 template<class Key, class Value>
