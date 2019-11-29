@@ -177,13 +177,11 @@ void spamBucketTest(){
     pthread_create(&threads[i], NULL, &spamWrite, (void*)&index[i]);
   }
 
-  cout << "started threads " << endl;
 
   for (int i = 0; i < no_threads; i++){
        pthread_join (threads[i], NULL);
   }
 
-  cout << "waiting for threads " << endl;
   for(int i = 0; i < 100; i++){
     assert(spamTable.singleRead(i*4096) == i*4096);
   }
@@ -263,7 +261,6 @@ void writeReadDeleteTest(){
   int value;
   int key;
   // gen map to be written,read and deleted
-  cout << "gen map" << endl;
   for(i = 0; i < no_write_threads; i++ ) {
     for(int j = 0; j < load; j++){
       value = rand();
@@ -281,15 +278,10 @@ void writeReadDeleteTest(){
     pthread_create(&threads[i + read_offset], NULL, &mapRead, (void*)&thread_data[i + read_offset]);
     pthread_create(&threads[i + delete_offset], NULL, &mapDelete, (void*)&thread_data[i + delete_offset]);
   }
-  cout << "created threads" << endl;
 
   for (i = 0; i < no_threads; i++){
       pthread_join(threads[i], NULL);
-      cout << "thread " << i << " done" << endl;
   }
-  cout << "threds done" << endl;
-
-  //thread_data[0].my_map.insert(make_pair(313131313, 111111));
 
   int count = 0;
   for(int i = 0; i < no_write_threads; i++){
@@ -320,6 +312,7 @@ void writeReadDeleteTest(){
 
   delete [] threads;
   delete [] thread_data;
+  cout << "writeReadDeleteTest: OK" << endl;
 }
 
 
@@ -330,7 +323,7 @@ int main(){
   writeAndReadTest();
   reHashTest();
   spamBucketTest();
-//  megaSpamTest();
+  megaSpamTest();
   writeReadDeleteTest();
   delete [] randTable;
 

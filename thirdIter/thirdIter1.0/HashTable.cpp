@@ -90,7 +90,7 @@ bool HashTable<Key, Value>::readAndWrite(Key key, Value new_val, Value old_val){
   auto bucket = &buckets[hash_func(key)];
   HashNode<Key,Value>* node;
   {
-    unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+    unique_lock<shared_timed_mutex> lock(*(bucket->getMutex()));
     node = bucket->getNode();
     while(node != nullptr){
       if(key == node->getKey()){
