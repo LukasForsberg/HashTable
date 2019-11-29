@@ -9,11 +9,11 @@ void test1(){
   //----------------------------------------------------------------------------
   //Test 1: Simple write->read.
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<string> strTable = HashTable<string>(8);
 
-  strTable.singleWrite("Edvin", 2);
+  strTable.singleWrite(2, "Edvin");
 
-  assert(strTable.singleRead("Edvin") == 2);
+  assert(strTable.singleRead(2) == "Edvin");
   assert(strTable.size() == 1);
 
   cout << "Test 1: OK" << endl;
@@ -23,7 +23,7 @@ void test2(){
   //----------------------------------------------------------------------------
   //Test2: Writing to same bucket.
 
-  HashTable<int,int> intTable = HashTable<int,int>(128);
+  HashTable<int> intTable = HashTable<int>(128);
 
   int first_int = intTable.getCapacity();
   int second_int = intTable.getCapacity() * 2;
@@ -42,7 +42,7 @@ void test3(){
   //----------------------------------------------------------------------------
   //Test3: Causing a rehash.
 
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  HashTable<int> hashTable = HashTable<int>(128);
   srand (time(0));
 
   for(int i = 0; i < 100; i++){

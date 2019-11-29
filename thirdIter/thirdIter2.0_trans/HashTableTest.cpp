@@ -1,14 +1,14 @@
 #include "HashTable.h"
 #include <type_traits>
 
-template<class Key, class Value>
+template<class Value>
 HashTable<Key, Value>::HashTable(size_t size){
   buckets = new Bucket<Key,Value>[size];
   capacity = size;
   load = 0;
 }
 
-template<class Key, class Value>
+template<class Value>
 HashTable<Key, Value>::~HashTable(){
   HashNode<Key,Value>* node;
   HashNode<Key,Value>* temp;
@@ -23,7 +23,7 @@ HashTable<Key, Value>::~HashTable(){
   delete [] buckets;
 }
 
-template<class Key, class Value>
+template<class Value>
 void HashTable<Key, Value>::singleWrite(Key key, Value value){
   #if test
     clock_gettime(CLOCK_REALTIME, &writeStart);
@@ -75,7 +75,7 @@ void HashTable<Key, Value>::singleWrite(Key key, Value value){
   #endif
 }
 
-template<class Key, class Value>
+template<class Value>
 Value HashTable<Key, Value>::singleRead(Key key){
   #if test
     clock_gettime(CLOCK_REALTIME, &readStart);
@@ -105,7 +105,7 @@ Value HashTable<Key, Value>::singleRead(Key key){
 }
 
 
-template<class Key, class Value>
+template<class Value>
 size_t HashTable<Key, Value>::hash_func(Key key){
   #if test
     clock_gettime(CLOCK_REALTIME, &funcStart);
@@ -119,7 +119,7 @@ size_t HashTable<Key, Value>::hash_func(Key key){
   return r;
 }
 
-template<class Key, class Value>
+template<class Value>
 void HashTable<Key, Value>::privateRehash(){
   #if test
     clock_gettime(CLOCK_REALTIME, &rehashStart);
@@ -145,7 +145,7 @@ void HashTable<Key, Value>::privateRehash(){
   #endif
 }
 
-template<class Key, class Value>
+template<class Value>
 void HashTable<Key, Value>::remove(Key key){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
   auto index = hash_func(key);
@@ -171,7 +171,7 @@ void HashTable<Key, Value>::remove(Key key){
   }
 }
 
-template<class Key, class Value>
+template<class Value>
 bool HashTable<Key, Value>::containsKey(const Key key){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
   Bucket<Key,Value>* bucket = &buckets[hash_func(key)];
@@ -186,7 +186,7 @@ bool HashTable<Key, Value>::containsKey(const Key key){
   return false;
 }
 
-template<class Key, class Value>
+template<class Value>
 bool HashTable<Key, Value>::contains(const Value value){
   shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
 
@@ -204,24 +204,24 @@ bool HashTable<Key, Value>::contains(const Value value){
   return false;
 }
 
-template<class Key, class Value>
+template<class Value>
 void HashTable<Key,Value>::rehash(){
   rehash_mutex.lock();
   privateRehash();
   rehash_mutex.unlock();
 }
 
-template<class Key, class Value>
+template<class Value>
 size_t HashTable<Key,Value>::size(){
   return load;
 }
 
-template<class Key, class Value>
+template<class Value>
 size_t HashTable<Key,Value>::getCapacity(){
   return capacity;
 }
 
-template<class Key, class Value>
+template<class Value>
 void HashTable<Key,Value>::print(){
   unique_lock<shared_timed_mutex> hash_lock(rehash_mutex);
   for(size_t i = 0; i < capacity; i++){
