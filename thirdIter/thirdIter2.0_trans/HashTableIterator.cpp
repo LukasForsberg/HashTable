@@ -1,28 +1,28 @@
 #include "HashTableIterator.h"
 
-template<class Key, class Value>
-HashTableIterator<Key,Value>::HashTableIterator(HashTable<Key,Value>* table){
+template<class Value>
+HashTableIterator<Value>::HashTableIterator(HashTable<Value>* table){
   this->buckets = table->buckets;
   node = this->buckets[0].getNode();
   index = 0;
   max_index = table->getCapacity();
 }
 
-template<class Key, class Value>
-HashTableIterator<Key,Value>::HashTableIterator(){
+template<class Value>
+HashTableIterator<Value>::HashTableIterator(){
   buckets = nullptr;
   node = nullptr;
   index = 0;
   max_index = 0;
 }
 
-template<class Key, class Value>
-bool HashTableIterator<Key,Value>::operator!=(const HashTableIterator<Key,Value>& hti) const {
+template<class Value>
+bool HashTableIterator<Value>::operator!=(const HashTableIterator<Value>& hti) const {
   return this->node != hti.node;
 }
 
-template<class Key, class Value>
-HashTableIterator<Key,Value>& HashTableIterator<Key,Value>::operator++() {
+template<class Value>
+HashTableIterator<Value>& HashTableIterator<Value>::operator++() {
   auto new_node = this->node->getNext();
   while(new_node == nullptr && index < max_index){
     index++;
@@ -32,13 +32,13 @@ HashTableIterator<Key,Value>& HashTableIterator<Key,Value>::operator++() {
   return *this;
 }
 
-template<class Key, class Value>
-HashNode<Key,Value> HashTableIterator<Key,Value>::operator*() {
+template<class Value>
+HashNode<Value> HashTableIterator<Value>::operator*() {
   return *node;
 }
 
-template<class Key, class Value>
-HashTableIterator<Key,Value>& HashTableIterator<Key,Value>::operator=(const HashTableIterator<Key,Value>& hti) {
+template<class Value>
+HashTableIterator<Value>& HashTableIterator<Value>::operator=(const HashTableIterator<Value>& hti) {
   this->node = hti.node;
   this->buckets = hti.buckets;
   this->index = hti.index;
@@ -47,7 +47,5 @@ HashTableIterator<Key,Value>& HashTableIterator<Key,Value>::operator=(const Hash
 }
 
 //wtf??????
-template class HashTableIterator<int,int>;
-template class HashTableIterator<string,int>;
-template class HashTableIterator<int,string>;
-template class HashTableIterator<string,string>;
+template class HashTableIterator<uint64_t>;
+template class HashTableIterator<int>;

@@ -22,7 +22,7 @@ Value HashNode<Value>::getValue(){
 
 template<class Value>
 void HashNode<Value>::setValue(Value val){
-  value = std::move(val);
+  value = val;
 }
 
 template<class Value>
@@ -36,4 +36,4 @@ HashNode<Value>* HashNode<Value>::getNext(){
 }
 
 template class HashNode<uint64_t>;
-template class HashNode<string>;
+template class HashNode<int>;

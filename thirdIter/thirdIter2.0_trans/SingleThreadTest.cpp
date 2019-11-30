@@ -9,11 +9,11 @@ void test1(){
   //----------------------------------------------------------------------------
   //Test 1: Simple write->read.
 
-  HashTable<string> strTable = HashTable<string>(8);
+  HashTable<int> strTable = HashTable<int>(8);
 
-  strTable.singleWrite(2, "Edvin");
+  strTable.singleWrite(2, 6);
 
-  assert(strTable.singleRead(2) == "Edvin");
+  assert(strTable.singleRead(2) == 6);
   assert(strTable.size() == 1);
 
   cout << "Test 1: OK" << endl;
@@ -56,7 +56,7 @@ void test3(){
 void test4(){
   //----------------------------------------------------------------------------
   //Test4: access removd value
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  HashTable<int> hashTable = HashTable<int>(128);
 
   for(int i = 0; i < 50; i++){
     hashTable.singleWrite(i, i);
@@ -77,7 +77,7 @@ void test4(){
 void test5(){
   //----------------------------------------------------------------------------
   //Test5: check for no duplicate keys
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  HashTable<int> hashTable = HashTable<int>(128);
 
   for(int i = 0; i < 50; i++){
     hashTable.singleWrite(5, i);
@@ -90,7 +90,7 @@ void test5(){
 void test6(){
   //----------------------------------------------------------------------------
   //Test6: hashed to same bucket but have different keys
-  HashTable<int,int> hashTable = HashTable<int,int>(8);
+  HashTable<int> hashTable = HashTable<int>(8);
   srand (time(0));
   hashTable.singleWrite(5, 1);
   int index1 = hashTable.hash_func(5);
@@ -111,28 +111,30 @@ void test6(){
 
 void containsTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<int> strTable = HashTable<int>(128);
 
-  strTable.singleWrite("Edvin", 2);
+  strTable.singleWrite(2, 6);
 
-  assert(strTable.containsKey("Edvin"));
-  assert(strTable.contains(2));
+  assert(strTable.containsKey(2));
+  assert(strTable.contains(6));
 
   cout << "ContainsTest: OK" << endl;
 }
 
 void isEmptyTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
-
-  assert(strTable.empty());
+  HashTable<int> hashTable = HashTable<int>(128);
+  assert(hashTable.empty());
+  hashTable.singleWrite(5, 1);
+  assert(hashTable.remove(5));
+  assert(hashTable.empty());
 
   cout << "isEmptyTest: OK" << endl;
 }
 
 void manualRehashTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<int> strTable = HashTable<int>(128);
 
   strTable.rehash();
 
@@ -147,39 +149,41 @@ void manualRehashTest(){
 
 void copyTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<int> strTable = HashTable<int>(128);
 
-  strTable.singleWrite("Edvin", 96);
-  strTable.singleWrite("Lukas", 85);
+  strTable.singleWrite(96, 1);
+  strTable.singleWrite(85, 2);
 
-  HashTable<string,int> copyTable = strTable;
+  HashTable<int> copyTable = strTable;
 
-  strTable.singleWrite("Pelle", 44);
+  strTable.singleWrite(44, 3);
+  strTable.remove(96);
+  strTable.remove(85);
 
-  assert(!(copyTable.contains(44)));
-  assert(copyTable.contains(96));
-  assert(copyTable.contains(85));
+  assert(!(copyTable.contains(3)));
+  assert(copyTable.contains(1));
+  assert(copyTable.contains(2));
 
   cout << "copyTest: OK" << endl;
 }
 
 void getKeysTest(){
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<int> strTable = HashTable<int>(128);
 
-  strTable.singleWrite("Marx",50);
-  strTable.singleWrite("Lenin",50);
-  strTable.singleWrite("Gorbatjov",50);
-  strTable.singleWrite("Smith",51);
-  strTable.singleWrite("Thatcher",49);
-  strTable.singleWrite("Reagan",48);
+  strTable.singleWrite(50, 1);
+  strTable.singleWrite(51, 1);
+  strTable.singleWrite(52, 1);
+  strTable.singleWrite(49, 2);
+  strTable.singleWrite(48 ,3);
+  strTable.singleWrite(47,4);
 
-  vector<string> commies = strTable.getKeys(50);
+  auto commies = strTable.getKeys(1);
   int nbr_of_commies = 0;
   for(size_t i = 0; i <commies.size(); i++){
-    if(commies[i] == "Marx" || commies[i] == "Lenin" || commies[i] == "Gorbatjov"){
+    if(commies[i] == 50 || commies[i] == 51 || commies[i] == 52){
        nbr_of_commies++;
     }
-    if(commies[i] == "Smith" || commies[i] == "Thatcher" || commies[i] == "Reagan"){
+    if(commies[i] == 49 || commies[i] == 48 || commies[i] == 47){
       assert(false);
     }
   }
@@ -188,7 +192,7 @@ void getKeysTest(){
 }
 
 void performance_test1(){
-  HashTable<int,int> hashTable = HashTable<int,int>(256);
+  HashTable<int> hashTable = HashTable<int>(256);
   srand (time(0));
   struct timespec start, end;
 
@@ -205,7 +209,7 @@ void performance_test1(){
 }
 
 void iteratorTest(){
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  HashTable<int> hashTable = HashTable<int>(128);
   for(int i = 0; i < 100; i++){
     hashTable.singleWrite(i, i);
   }
@@ -219,7 +223,7 @@ void iteratorTest(){
 }
 
 void performance_test2(){
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  HashTable<int> hashTable = HashTable<int>(128);
   srand (time(0));
   struct timespec start, end;
 
@@ -236,7 +240,7 @@ void performance_test2(){
 }
 
 void performance_test3(){
-  HashTable<int,int> hashTable = HashTable<int,int>(64);
+  HashTable<int> hashTable = HashTable<int>(64);
   srand (time(0));
   struct timespec start, end;
 
@@ -253,7 +257,7 @@ void performance_test3(){
 }
 
 void performance_test4(){
-  HashTable<int,int> hashTable = HashTable<int,int>(256);
+  HashTable<int> hashTable = HashTable<int>(256);
   srand (time(0));
   struct timespec startWrite, endWrite, startRead, endRead;
 
@@ -273,7 +277,7 @@ void performance_test4(){
 
 void performance_test5(){
   #if test
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
+  HashTable<int> hashTable = HashTable<int>(128);
   srand (time(0));
   hashTable.funcSum.tv_nsec = 0;
   hashTable.writeSum.tv_nsec = 0;

@@ -39,7 +39,10 @@ private:
 };
 
 
+template class Bucket<uint64_t>;
 template class Bucket<int>;
-template class Bucket<std::string>;
+
+
+
 
 #endif

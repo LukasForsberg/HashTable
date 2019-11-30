@@ -125,7 +125,7 @@ Value HashTable<Value>::singleRead(uint64_t key){
   //synchronized {
   atomic_noexcept{
     while(node != nullptr){
-      if(key == node->getKey())){
+      if(key == node->getKey()){
         return node->getValue();
       }
       node = node->getNext();
@@ -180,9 +180,10 @@ bool HashTable<Value>::remove(uint64_t key){
   Bucket<Value>* bucket = &buckets[hash_func(key)];
   HashNode<Value>* node;
   HashNode<Value>* prev_node = nullptr;
+  bool del_flag = false;
 
   synchronized {
-  // atomic_noexcept{
+    // atomic_noexcept{
     node = bucket->getNode();
     while(node != nullptr){
       if(node->getKey() == key){
@@ -191,16 +192,16 @@ bool HashTable<Value>::remove(uint64_t key){
         } else {
           bucket->setNode(node->getNext());
         }
-        prev_node = node;
-        node = nullptr;
+        load.fetch_sub(1, std::memory_order_relaxed);
+        del_flag = true;
+        break;
       }
       prev_node = node;
       node = node->getNext();
     }
   }
-  if(prev_node != nullptr){
-    load.fetch_sub(1, std::memory_order_relaxed);
-    delete prev_node;
+  if(del_flag){
+    delete node;
     return true;
   }
   return false;
@@ -338,5 +339,5 @@ HashTableIterator<Value> HashTable<Value>::end() {
 
 
 //wtf??????
+template class HashTable<uint64_t>;
 template class HashTable<int>;
-template class HashTable<string>;

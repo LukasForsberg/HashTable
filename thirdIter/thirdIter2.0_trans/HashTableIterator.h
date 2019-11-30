@@ -17,7 +17,7 @@ public:
 
 	HashTableIterator& operator++();
 
-	HashNode<Key,Value> operator*();
+	HashNode<Value> operator*();
 
   HashTableIterator& operator=(const HashTableIterator& hti);
 

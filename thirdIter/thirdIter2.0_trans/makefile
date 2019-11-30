@@ -25,12 +25,12 @@ LDFLAGS =   -g -pthread -fgnu-tm
 HASH_PROGS = HashTable.o HashNode.o  Bucket.o HashTableIterator.o
 HASH_TEST_PROGS = HashTableTest.o HashNode.o  Bucket.o HashTableIterator.o
 # Targets
-PROGS = SingleThreadTest MultipleThreadsTest
+PROGS = SingleThreadTest #MultipleThreadsTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
 SingleThreadTest: SingleThreadTest.o $(HASH_PROGS)
-MultipleThreadsTest: MultipleThreadsTest.o $(HASH_PROGS)
+#MultipleThreadsTest: MultipleThreadsTest.o $(HASH_PROGS)
 
 
 # Phony targets
