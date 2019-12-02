@@ -12,13 +12,12 @@ template<class Key, class Value> class Bucket{
 public:
   void setNode(HashNode<Key,Value>* newNode){ node = newNode; }
   HashNode<Key,Value>* getNode(){ return node; }
-  std::shared_timed_mutex* getMutex(){ return &mtx; }
   bool empty(){ return node == nullptr; };
   void append(HashNode<Key, Value>* new_node) transaction_safe;
 
   Bucket() { node = nullptr; }
   Bucket(HashNode<Key,Value>* newNode) { node = newNode; }
-  ~Bucket();
+  //~Bucket();
   Bucket(Bucket<Key,Value> const& copy){ node = copy.node; }
   Bucket& operator=(Bucket rhs) // Pass by value (thus generating a copy)
   {
@@ -35,7 +34,6 @@ public:
 
 
 private:
-  mutable std::shared_timed_mutex mtx;
   HashNode<Key,Value>* node;
 };
 
