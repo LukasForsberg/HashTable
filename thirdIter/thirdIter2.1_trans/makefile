@@ -10,19 +10,18 @@ CC  = $(CXX)
 # Define preprocessor, compiler, and linker flags. Uncomment the # lines
 # if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
 # -g is for debugging.
-CPPFLAGS =  -std=c++17 -I. -pthread
-CXXFLAGS = -fgnu-tm -Wall -Wextra -pedantic-errors #-Wold-style-cast
+CPPFLAGS =  -std=c++17 -I. -pthread -fgnu-tm
+CXXFLAGS = -Wall -Wextra -pedantic-errors #-Wold-style-cast
 CXXFLAGS +=  -o3
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
 LDFLAGS =   -g -pthread -fgnu-tm
-#<<<<<<< HEAD:lab3/Makefile
+
 #LDLIBS = -llab1
-#>>>>>>> 66f8aecc57cd547e4d720bb76d2dc5643db909ab:Makefile
 #CPPFLAGS += -stdlib=libc++
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS +=  -stdlib=libc++
-HASH_PROGS = HashTable.o HashNode.o  Bucket.o HashTableIterator.o
+HASH_PROGS = HashTable.o HashNode.o  Bucket.o HashTableIterator.o custom/tm_string.h
 HASH_TEST_PROGS = HashTableTest.o HashNode.o  Bucket.o HashTableIterator.o
 # Targets
 PROGS = SingleThreadTest MultipleThreadsTest

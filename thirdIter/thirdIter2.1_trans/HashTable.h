@@ -35,7 +35,7 @@ template<class Key, class Value> class HashTable {
     size_t hash_func(Key key);
     bool remove(Key key);
     bool contains(const Value value); // TODO: this could be parallised
-    vector<Key> getKeys(const Value value); // TODO: this could be parallised
+    vector<Key> getKeys(const Value value, const int max_keys); // TODO: this could be parallised
     bool containsKey(const Key key);
     void print();
     bool empty();
@@ -47,7 +47,8 @@ template<class Key, class Value> class HashTable {
     #if test
       struct timespec readStart, readEnd, readSum,
         writeStart, writeEnd,writeSum ,funcStart, funcEnd, funcSum,
-        rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum;
+        rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum,
+        hashStart, hashEnd, hashSum;
     #endif
 
   private:
@@ -56,7 +57,7 @@ template<class Key, class Value> class HashTable {
     Bucket<Key,Value>* buckets;
     size_t capacity;
     atomic<uint16_t> load;
-    const uint16_t cores = get_nprocs_conf();
+    const size_t cores = get_nprocs_conf();
     mutable shared_timed_mutex rehash_mutex;
     atomic_flag rehash_flag = ATOMIC_FLAG_INIT;
 

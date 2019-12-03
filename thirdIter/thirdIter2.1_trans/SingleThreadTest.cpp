@@ -1,6 +1,6 @@
 #include "HashTable.h"
 #include <iostream>
-#include <string>
+#include "custom/tm_string.h"
 #include <cassert>
 #include <stdlib.h>
 #include <time.h>
@@ -9,7 +9,7 @@ void test1(){
   //----------------------------------------------------------------------------
   //Test 1: Simple write->read.
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
   strTable.singleWrite("Edvin", 2);
 
@@ -111,7 +111,7 @@ void test6(){
 
 void containsTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
   strTable.singleWrite("Edvin", 2);
 
@@ -123,7 +123,7 @@ void containsTest(){
 
 void isEmptyTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
   assert(strTable.empty());
 
@@ -132,7 +132,7 @@ void isEmptyTest(){
 
 void manualRehashTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
   strTable.rehash();
 
@@ -147,12 +147,12 @@ void manualRehashTest(){
 
 void copyTest(){
 
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
   strTable.singleWrite("Edvin", 96);
   strTable.singleWrite("Lukas", 85);
 
-  HashTable<string,int> copyTable = strTable;
+  HashTable<tm_string,int> copyTable = strTable;
 
   strTable.singleWrite("Pelle", 44);
 
@@ -164,7 +164,7 @@ void copyTest(){
 }
 
 void getKeysTest(){
-  HashTable<string,int> strTable = HashTable<string,int>(128);
+  HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
   strTable.singleWrite("Marx",50);
   strTable.singleWrite("Lenin",50);
@@ -173,7 +173,7 @@ void getKeysTest(){
   strTable.singleWrite("Thatcher",49);
   strTable.singleWrite("Reagan",48);
 
-  vector<string> commies = strTable.getKeys(50);
+  vector<tm_string> commies = strTable.getKeys(50, 5);
   int nbr_of_commies = 0;
   for(size_t i = 0; i <commies.size(); i++){
     if(commies[i] == "Marx" || commies[i] == "Lenin" || commies[i] == "Gorbatjov"){
@@ -202,20 +202,6 @@ void performance_test1(){
   clock_gettime(CLOCK_REALTIME, &end);
   //double time_spent = (end.tv_sec - start.tv_sec) +
   cout << "Performance Test 1: init size 256 took: " << (end.tv_nsec - start.tv_nsec) << endl;
-}
-
-void iteratorTest(){
-  HashTable<int,int> hashTable = HashTable<int,int>(128);
-  for(int i = 0; i < 100; i++){
-    hashTable.singleWrite(i, i);
-  }
-  int i = 0;
-  for(auto node : hashTable){
-    assert(node.getKey() == i);
-    assert(node.getValue() == i);
-    i++;
-  }
-  cout << "Iterator test: OK" << endl;
 }
 
 void performance_test2(){
@@ -299,14 +285,13 @@ void performance_test5(){
 
 int main(){
 
-  test1();
+  //test1();
   test2();
   test3();
   test4();
   test5();
   test6();
 
-  iteratorTest();
   containsTest();
   manualRehashTest();
   isEmptyTest();

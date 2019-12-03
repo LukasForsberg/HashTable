@@ -1,4 +1,5 @@
 #include "HashTableIterator.h"
+#include "custom/tm_string.h"
 
 template<class Key, class Value>
 HashTableIterator<Key,Value>::HashTableIterator(HashTable<Key,Value>* table){
@@ -48,6 +49,6 @@ HashTableIterator<Key,Value>& HashTableIterator<Key,Value>::operator=(const Hash
 
 //wtf??????
 template class HashTableIterator<int,int>;
-template class HashTableIterator<string,int>;
-template class HashTableIterator<int,string>;
-template class HashTableIterator<string,string>;
+template class HashTableIterator<tm_string,int>;
+template class HashTableIterator<int,tm_string>;
+template class HashTableIterator<tm_string,tm_string>;

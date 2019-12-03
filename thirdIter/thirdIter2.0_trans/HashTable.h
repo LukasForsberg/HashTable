@@ -15,49 +15,48 @@
 
 using namespace std;
 
-template<class Key, class Value> class HashTableIterator;
+template<class Value> class HashTableIterator;
 
 #define test (1)
 
-template<class Key, class Value> class HashTable {
-  friend class HashTableIterator<Key,Value>;
+template<class Value> class HashTable {
+  friend class HashTableIterator<Value>;
 
   public:
     HashTable(size_t size);
     ~HashTable();
-    HashTable(const HashTable<Key, Value> &table);
-    void singleWrite(Key key, Value value);
-    Value singleRead(Key key);
-    bool readAndWrite(Key key, Value new_val, Value old_val);
+    HashTable(const HashTable<Value> &table);
+    void singleWrite(uint64_t key, Value value);
+    Value singleRead(uint64_t key);
+    bool readAndWrite(uint64_t key, Value new_val, Value old_val);
 
     size_t size();
     size_t getCapacity();
-    size_t hash_func(Key key);
-    bool remove(Key key);
+    size_t hash_func(uint64_t key);
+    bool remove(uint64_t key);
     bool contains(const Value value); // TODO: this could be parallised
-    vector<Key> getKeys(const Value value); // TODO: this could be parallised
-    bool containsKey(const Key key);
+    vector<uint64_t> getKeys(const Value value); // TODO: this could be parallised
+    bool containsKey(const uint64_t key);
     void print();
     bool empty();
     void rehash();
 
-    HashTableIterator<Key,Value> begin();
-	  HashTableIterator<Key,Value> end();
+    HashTableIterator<Value> begin();
+	  HashTableIterator<Value> end();
 
     #if test
       struct timespec readStart, readEnd, readSum,
         writeStart, writeEnd,writeSum ,funcStart, funcEnd, funcSum,
-        rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum,
-        hashStart, hashEnd, hashSum;
+        rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum;
     #endif
 
   private:
 
     //attributes
-    Bucket<Key,Value>* buckets;
-    size_t capacity;
-    atomic<uint16_t> load;
-    const size_t cores = get_nprocs_conf();
+    Bucket<Value>* buckets;
+    uint64_t capacity;
+    atomic<uint64_t> load;
+    const uint16_t cores = get_nprocs_conf();
     mutable shared_timed_mutex rehash_mutex;
     atomic_flag rehash_flag = ATOMIC_FLAG_INIT;
 

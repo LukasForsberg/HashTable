@@ -1,6 +1,5 @@
 #include "HashTable.h"
 #include <iostream>
-#include <string>
 #include <cassert>
 #include <stdlib.h>
 #include <time.h>
@@ -320,19 +319,11 @@ void writeReadDeleteTest(){
 
 int main(){
 
-<<<<<<< HEAD
-  //writeAndReadTest();
-  //reHashTest();
-  spamBucketTest();
-  //megaSpamTest();
-  //delete [] randTable;
-=======
   writeAndReadTest();
   reHashTest();
   spamBucketTest();
   megaSpamTest();
   writeReadDeleteTest();
   delete [] randTable;
->>>>>>> 29168b69fdad915d3e8403a580be7c03289af867
 
 }

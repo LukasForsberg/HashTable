@@ -11,12 +11,12 @@ HashNode<Key, Value>::HashNode(Key k, Value val){
 }
 
 template<class Key, class Value>
-Key HashNode<Key, Value>::getKey(){
+Key& HashNode<Key, Value>::getKey(){
   return key;
 }
 
 template<class Key, class Value>
-Value HashNode<Key, Value>::getValue(){
+Value& HashNode<Key, Value>::getValue(){
   return value;
 }
 
@@ -36,6 +36,6 @@ HashNode<Key, Value>* HashNode<Key, Value>::getNext(){
 }
 
 template class HashNode<int,int>;
-template class HashNode<string,int>;
-template class HashNode<int,string>;
-template class HashNode<string,string>;
+template class HashNode<tm_string,int>;
+template class HashNode<int,tm_string>;
+template class HashNode<tm_string,tm_string>;
