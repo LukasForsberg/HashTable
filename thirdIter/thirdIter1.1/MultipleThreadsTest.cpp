@@ -16,7 +16,7 @@ using std::pair;
 
   HashTable<int,int> writeTable = HashTable<int,int>(128);
 
-  HashTable<int,int> reHashTable = HashTable<int,int>(128);
+  HashTable<int,int> reHashTable = HashTable<int,int>(8192);
 
   HashTable<int,int> spamTable = HashTable<int,int>(128);
 
@@ -31,7 +31,7 @@ void* write(void *arg){
 
 void* hashWrite(void *arg){
   int index = *((int*)(&arg));
-  for(int j =  100*(int )index; j < 100*((int) index+1); j++){
+  for(int j =  1000*(int )index; j < 1000*((int) index+1); j++){
     reHashTable.singleWrite(j, randTable[j]);
   }
   return arg;
@@ -139,14 +139,14 @@ void writeAndReadTest(){
   cout << "writeAndReadTest: OK" << endl;
 }
 
-void reHashTest(){
+ uint64_t reHashTest(){
 
   cout << "reHashTest: RUNNING..." << endl;
   int no_threads = 10;
   pthread_t *threads = new pthread_t[no_threads];
 
-  for( int i = 0; i < no_threads*100; i++ ) {
-    randTable[i] = rand() % 100;
+  for( int i = 0; i < no_threads*1000; i++ ) {
+    randTable[i] = rand() % 1000;
   }
 
   for( int i = 0; i < no_threads; i++ ) {
@@ -157,11 +157,13 @@ void reHashTest(){
     pthread_join (threads[i], NULL);
   }
 
-  for( int i = 0; i < no_threads*100; i++) {
+  for( int i = 0; i < no_threads*1000; i++) {
     assert(reHashTable.singleRead(i) == randTable[i]);
   }
   delete [] threads;
   cout << "rehashTest: OK" << endl;
+  return reHashTable.hashSum.tv_nsec;
+
 }
 
 void spamBucketTest(){
@@ -320,11 +322,15 @@ void writeReadDeleteTest(){
 
 int main(){
 
-  writeAndReadTest();
-  reHashTest();
-  spamBucketTest();
-  megaSpamTest();
-  writeReadDeleteTest();
+  //writeAndReadTest();
+  uint64_t sum = 0;
+  for(int i = 0; i < 1000; i++){
+    sum += reHashTest();
+  }
+  cout <<( sum / 1000 )<< endl;
+  //spamBucketTest();
+  //megaSpamTest();
+  //writeReadDeleteTest();
   delete [] randTable;
 
 }

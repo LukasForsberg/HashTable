@@ -128,6 +128,7 @@ template<class Key, class Value>
 void HashTable<Key, Value>::privateRehash(){
 
   clock_gettime(CLOCK_REALTIME, &hashStart);
+  cout << "REHASH" << endl;
 
   size_t oldCapacity = capacity;
   capacity = capacity << 1;
@@ -152,7 +153,13 @@ void HashTable<Key, Value>::privateRehash(){
   buckets = temp;
 
   clock_gettime(CLOCK_REALTIME, &hashEnd);
-  hashSum.tv_nsec = hashSum.tv_nsec + hashEnd.tv_nsec - hashStart.tv_nsec;
+
+
+
+    hashSum.tv_nsec = hashSum.tv_nsec + hashEnd.tv_nsec - hashStart.tv_nsec;
+    hashSum.tv_sec = hashSum.tv_sec + hashEnd.tv_sec - hashStart.tv_sec;
+
+    nanoTotal = hashSum.tv_sec * 1000 + hashSum.tv_nsec / 1000000;
 
 }
 

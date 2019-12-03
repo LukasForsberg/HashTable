@@ -130,22 +130,26 @@ size_t HashTable<Key, Value>::hash_func(Key key){
 
 template<class Key, class Value>
 void HashTable<Key, Value>::privateRehash(){
+  clock_gettime(CLOCK_REALTIME, &hashStart);
 
   size_t no_threads;
   size_t chunkSize;
 
-  if(cores < (capacity >> 6)){
+  if(cores < (capacity >> 10)){
     no_threads = cores;
     chunkSize = capacity / cores;
   } else {
-     if(capacity >= 64){
-       chunkSize = 64;
-       no_threads = capacity >> 6;
+     if(capacity >= 1024){
+       no_threads = (capacity >> 10) >> 1;
      } else {
        chunkSize = capacity;
        no_threads = 1;
      }
+
+     chunkSize = capacity >> 9;
   }
+
+
 
   capacity = capacity << 1;
   arena->setSize(capacity);
@@ -165,6 +169,9 @@ void HashTable<Key, Value>::privateRehash(){
 
   delete [] buckets;
   buckets = temp;
+
+  clock_gettime(CLOCK_REALTIME, &hashEnd);
+  hashSum.tv_nsec = hashSum.tv_nsec + hashEnd.tv_nsec - hashStart.tv_nsec;
 }
 
 template<class Key, class Value>

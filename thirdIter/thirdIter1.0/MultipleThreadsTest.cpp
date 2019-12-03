@@ -16,7 +16,7 @@ using std::pair;
 
   HashTable<int,int> writeTable = HashTable<int,int>(128);
 
-  HashTable<int,int> reHashTable = HashTable<int,int>(128);
+  HashTable<int,int> reHashTable = HashTable<int,int>(8192);
 
   HashTable<int,int> spamTable = HashTable<int,int>(128);
 
@@ -31,7 +31,7 @@ void* write(void *arg){
 
 void* hashWrite(void *arg){
   int index = *((int*)(&arg));
-  for(int j =  100*(int )index; j < 100*((int) index+1); j++){
+  for(int j =  1000*(int )index; j < 1000*((int) index+1); j++){
     reHashTable.singleWrite(j, randTable[j]);
   }
   return arg;
@@ -150,7 +150,7 @@ void reHashTest(){
   int no_threads = 10;
   pthread_t *threads = new pthread_t[no_threads];
 
-  for( int i = 0; i < no_threads*100; i++ ) {
+  for( int i = 0; i < no_threads*1000; i++ ) {
     randTable[i] = rand() % 100;
   }
 
@@ -162,11 +162,11 @@ void reHashTest(){
     pthread_join (threads[i], NULL);
   }
 
-  for( int i = 0; i < no_threads*100; i++) {
+  for( int i = 0; i < no_threads*1000; i++) {
     assert(reHashTable.singleRead(i) == randTable[i]);
   }
   delete [] threads;
-  
+
   clock_gettime(CLOCK_REALTIME, &endTest);
 
   cout << "Total test time:   " << (endTest.tv_nsec - startTest.tv_nsec) << endl;
