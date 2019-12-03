@@ -14,21 +14,19 @@
 #include <vector>
 #include "../Arena/Arena.h"
 #include <type_traits>
-#include <sys/sysinfo.h>
 
 using namespace std;
 
 template<class Key, class Value> class HashTableIterator;
 template<class Key, class Value> class HashTable;
-template<class Key, class Value> class Bucket;
 
 template<class Key, class Value>
 struct arg_struct {
     thread t;
-    size_t chunkSize;
-    int index;
     Bucket<Key,Value>* temp;
     HashTable<Key,Value>* table;
+    int index;
+    size_t chunkSize;
 };
 
 #define test (1)
@@ -44,13 +42,12 @@ template<class Key, class Value> class HashTable {
     struct arg_struct<Key,Value>* thread_args;
     size_t capacity;
     atomic<uint16_t> load;
+    const size_t cores = get_nprocs_conf();
     mutable shared_timed_mutex rehash_mutex;
     atomic_flag rehash_flag = ATOMIC_FLAG_INIT;
-    const size_t cores = get_nprocs_conf();
 
     //help functions
     void privateRehash(){
-
         size_t no_threads;
         size_t chunkSize;
 
@@ -111,9 +108,7 @@ template<class Key, class Value> class HashTable {
         return x && (!(x&(x-1)));
     }
 
-
   public:
-
     HashTable(size_t size){
       if(!isPowerOfTwo(size)){
         throw InvalidSizeException();
@@ -152,24 +147,28 @@ template<class Key, class Value> class HashTable {
 
     void write(Key key, Value value){
       {
-        shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+        shared_lock<shared_timed_mutex> hash_lock(rehash_mutex);
         auto bucket = &buckets[hash_func(key)];
         HashNode<Key,Value>* node;
-        {
-          unique_lock<shared_timed_mutex> lock(*(bucket->getMutex()));
+        atomic_noexcept{
           node = bucket->getNode();
-          while(node != nullptr){
+        }
+        while(node != nullptr){
+          atomic_noexcept{
             if(key == node->getKey()){
                node->setValue(value);
                break;
             }
             node = node->getNext();
           }
-          if(node == nullptr){
-            node = arena->alloc(key,value);
+        }
+
+        if(node == nullptr){
+          node = arena->alloc(key,value);
+          atomic_noexcept{
             bucket->append(node);
-            load.fetch_add(1, std::memory_order_relaxed);
           }
+          load.fetch_add(1, std::memory_order_relaxed);
         }
       }
 
@@ -188,17 +187,18 @@ template<class Key, class Value> class HashTable {
       shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
       auto bucket = &buckets[hash_func(key)];
       HashNode<Key,Value>* node;
-      {
-        shared_lock<shared_timed_mutex> lock(*(bucket->getMutex()));
+
+      atomic_noexcept{
         node = bucket->getNode();
         while(node != nullptr){
           if(key == node->getKey()){
             return node->getValue();
+            break;
           }
           node = node->getNext();
         }
-        throw InvalidReadExeption();
       }
+      throw InvalidReadExeption();
     }
 
     Value readAndWrite(Key key, Value new_val){
@@ -206,8 +206,7 @@ template<class Key, class Value> class HashTable {
       auto bucket = &buckets[hash_func(key)];
       HashNode<Key,Value>* node;
       Value v;
-      {
-        unique_lock<shared_timed_mutex> lock(*(bucket->getMutex()));
+      atomic_noexcept{
         node = bucket->getNode();
         while(node != nullptr){
           if(key == node->getKey()){
@@ -236,12 +235,13 @@ template<class Key, class Value> class HashTable {
 
     bool remove(Key key){
       shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
-      auto index = hash_func(key);
-      Bucket<Key,Value>* bucket = &buckets[index];
+      Bucket<Key,Value>* bucket = &buckets[hash_func(key)];
       HashNode<Key,Value>* node;
       HashNode<Key,Value>* prev_node = nullptr;
-      {
-        std::unique_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
+      bool del_flag = false;
+
+      //synchronized {
+      atomic_noexcept{
         node = bucket->getNode();
         while(node != nullptr){
           if(node->getKey() == key){
@@ -250,61 +250,80 @@ template<class Key, class Value> class HashTable {
             } else {
               bucket->setNode(node->getNext());
             }
-            load.fetch_sub(1, std::memory_order_relaxed);
-            arena->free(node);
-            return true;
+            del_flag = true;
+            break;
           }
           prev_node = node;
           node = node->getNext();
         }
+      }
+      if(del_flag){
+        load.fetch_sub(1, std::memory_order_relaxed);
+        arena->free(node);
+        return true;
       }
       return false;
     }
 
     bool contains(const Value value){
       shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+      Bucket<Key,Value>* bucket;
       HashNode<Key,Value>* node;
       for(size_t i = 0; i < capacity; i++){
-        std::shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
-          node = buckets[i].getNode();
+        bucket = &buckets[i];
+        //synchronized {
+        atomic_noexcept{
+          node = bucket->getNode();
           while (node != nullptr){
             if(node->getValue() == value){
               return true;
             }
             node = node->getNext();
           }
+        }
       }
       return false;
-    }; // TODO: this could be parallised
+    }
 
-    vector<Key> getKeys(const Value value){
-      shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
+    vector<Key> getKeys(const Value value, const int max_keys){
+      shared_lock<shared_timed_mutex> hash_lock(rehash_mutex);
       vector<Key> v;
+      v.resize(max_keys);
+      int count = 0;
+      Bucket<Key,Value>* bucket;
       HashNode<Key,Value>* node;
       for(size_t i = 0; i < capacity; i++){
-      shared_lock<std::shared_timed_mutex> lock(*(buckets[i].getMutex()));
-          node = buckets[i].getNode();
+        bucket = &buckets[i];
+        //synchronized {
+        atomic_noexcept{
+          node = bucket->getNode();
           while (node != nullptr){
             if(node->getValue() == value){
-              v.push_back(node->getKey());
+              v[count] = node->getKey();
+              count++;
+              if(count > max_keys){
+                return v;
+              }
             }
             node = node->getNext();
           }
+        }
       }
       return v;
-    } // TODO: this could be parallised
+    }
 
     bool containsKey(const Key key){
       shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
       Bucket<Key,Value>* bucket = &buckets[hash_func(key)];
-      HashNode<Key,Value>* node;
-      std::shared_lock<std::shared_timed_mutex> lock(*(bucket->getMutex()));
-      node = bucket->getNode();
-      while (node != nullptr){
-        if(node->getKey() == key){
-          return true;
+      //synchronized {
+      atomic_noexcept{
+        auto node = bucket->getNode();
+        while (node != nullptr){
+          if(node->getKey() == key){
+            return true;
+          }
+          node = node->getNext();
         }
-        node = node->getNext();
       }
       return false;
     }
@@ -331,11 +350,6 @@ template<class Key, class Value> class HashTable {
       rehash_mutex.unlock();
     }
 
-    /*TODO a method called readOnly() could be implemented, this make the hashTable only accessable to  reads.
-    writes and deletes are not allowed. thus during reads the table dosen't  have to be locked. writes and deletes could be buffered
-    and added to the table when the read only phase ends.
-    */
-
     HashTableIterator<Key,Value> begin(){
       return HashTableIterator<Key,Value>(this);
     }
@@ -350,6 +364,7 @@ template<class Key, class Value> class HashTable {
         rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum,
         hashStart, hashEnd, hashSum;
     #endif
+
 
 };
 

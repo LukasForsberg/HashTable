@@ -13,11 +13,13 @@ public:
   void setNode(HashNode<Key,Value>* newNode){ node = newNode; }
   HashNode<Key,Value>* getNode(){ return node; }
   bool empty(){ return node == nullptr; };
-  void append(HashNode<Key, Value>* new_node) transaction_safe;
+  void append(HashNode<Key, Value>* new_node) transaction_safe{
+    new_node->insertNext(node);
+    node = new_node;
+  }
 
   Bucket() { node = nullptr; }
   Bucket(HashNode<Key,Value>* newNode) { node = newNode; }
-  //~Bucket();
   Bucket(Bucket<Key,Value> const& copy){ node = copy.node; }
   Bucket& operator=(Bucket rhs) // Pass by value (thus generating a copy)
   {
