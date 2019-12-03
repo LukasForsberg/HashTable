@@ -205,7 +205,7 @@ void megaSpamTest(){
   delete [] thread_data;
   cout << "megaSpamTest: OK" << endl;
 }
-
+/*
 void writeReadDeleteTest(){
   cout << "writeReadDeleteTest: RUNNING..." << endl;
   int no_threads = 12;
@@ -243,7 +243,7 @@ void writeReadDeleteTest(){
   delete [] d_threads;
   delete [] thread_data;
 }
-
+*/
 
 //-----------------------------------MAIN-------------------------------------//
 

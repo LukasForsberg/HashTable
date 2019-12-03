@@ -145,7 +145,6 @@ void reHashTest(){
   cout << "rehashTest: OK" << endl;
 }
 
-//NEVER PASSES (INVALID READ EXCEPTION)
 void spamBucketTest(){
 
   cout << "spamBucketTest: RUNNING..." << endl;
@@ -229,8 +228,8 @@ void megaSpamTest(){
 int main(){
 
   //writeAndReadTest();
-  reHashTest();
-  //spamBucketTest();
+  //reHashTest();
+  spamBucketTest();
   //megaSpamTest();
   //delete [] randTable;
 
