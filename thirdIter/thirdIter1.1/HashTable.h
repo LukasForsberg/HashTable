@@ -17,6 +17,16 @@
 using namespace std;
 
 template<class Key, class Value> class HashTableIterator;
+template<class Key, class Value> class HashTable;
+
+template<class Key, class Value>
+struct arg_struct {
+    thread t;
+    size_t chunkSize;
+    int index;
+    Bucket<Key,Value>* temp;
+    HashTable<Key,Value>* table;
+};
 
 #define test (1)
 
@@ -61,12 +71,14 @@ template<class Key, class Value> class HashTable {
 
     //attributes
     Bucket<Key,Value>* buckets;
+    Arena<Key,Value>* arena;
+    struct arg_struct<Key,Value>* thread_args;
+
     size_t capacity;
     atomic<uint16_t> load;
-    const size_t cores = get_nprocs_conf();
     mutable shared_timed_mutex rehash_mutex;
     atomic_flag rehash_flag = ATOMIC_FLAG_INIT;
-    Arena<Key,Value>* arena;
+    const size_t cores = get_nprocs_conf();
 
     //help functions
     void privateRehash();

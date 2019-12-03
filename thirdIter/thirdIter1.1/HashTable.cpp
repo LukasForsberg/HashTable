@@ -13,6 +13,7 @@ HashTable<Key, Value>::HashTable(size_t size){
   }
   buckets = new Bucket<Key,Value>[size];
   arena = new Arena<Key,Value>(size);
+  thread_args = new struct arg_struct<Key,Value>[cores];
   capacity = size;
   load = 0;
 }
@@ -22,6 +23,7 @@ HashTable<Key, Value>::~HashTable(){
   unique_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
   delete [] buckets;
   delete arena;
+  delete [] thread_args;
 }
 
 template<class Key, class Value>
@@ -127,14 +129,6 @@ size_t HashTable<Key, Value>::hash_func(Key key){
 }
 
 template<class Key, class Value>
-struct arg_struct {
-    size_t chunkSize;
-    int index;
-    Bucket<Key,Value>* temp;
-    HashTable<Key,Value>* table;
-};
-
-template<class Key, class Value>
 void HashTable<Key, Value>::privateRehash(){
 
   size_t no_threads;
@@ -155,35 +149,22 @@ void HashTable<Key, Value>::privateRehash(){
 
   capacity = capacity << 1;
   arena->setSize(capacity);
-
-  //Bucket<Key,Value>* temp = (Bucket<Key,Value>*)malloc( sizeof(Bucket<Key,Value>) * capacity + ( (sizeof(thread) + sizeof(struct arg_struct<Key,Value>) ) * no_threads) );
-
-  //thread* helpThreads  = (thread*)((Bucket<Key,Value>*)temp + capacity);
-
-  //struct arg_struct<Key,Value>* args = (struct arg_struct<Key,Value>*)((thread*)helpThreads + no_threads);
-
-
   Bucket<Key,Value>* temp = new Bucket<Key,Value>[capacity];
-  thread* helpThreads = new thread[no_threads];
-  struct arg_struct<Key,Value>* args = new struct arg_struct<Key,Value>[no_threads];
 
   for( size_t i = 0; i < no_threads; i++ ) {
-    args[i].chunkSize = chunkSize;
-    args[i].index = i;
-    args[i].temp = temp;
-    args[i].table = this;
-    helpThreads[i] = thread(HashTable<Key,Value>::subHash, &args[i]);
+    thread_args[i].chunkSize = chunkSize;
+    thread_args[i].index = i;
+    thread_args[i].temp = temp;
+    thread_args[i].table = this;
+    thread_args[i].t = thread(HashTable<Key,Value>::subHash, &thread_args[i]);
   }
 
   for (size_t i = 0; i < no_threads; i++){
-      helpThreads[i].join();
+      thread_args[i].t.join();
  }
 
   delete [] buckets;
   buckets = temp;
-  delete [] helpThreads;
-  delete [] args;
-  //free(temp);
 }
 
 template<class Key, class Value>
@@ -302,7 +283,7 @@ void HashTable<Key,Value>::print(){
 
 template<class Key, class Value>
 void* HashTable<Key,Value>::subHash(void *arguments){
-  struct arg_struct<Key, Value> *args = (arg_struct<Key,Value>*)arguments;
+  struct arg_struct<Key,Value> *args = (arg_struct<Key,Value>*)arguments;
   size_t index = args->index;
   size_t chunkSize = args->chunkSize;
   Bucket<Key,Value>* temp = args-> temp;
