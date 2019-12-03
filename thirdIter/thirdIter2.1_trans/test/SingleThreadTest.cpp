@@ -1,4 +1,4 @@
-#include "HashTable.h"
+#include "../src/Table/HashTable.h"
 #include <iostream>
 #include "custom/tm_string.h"
 #include <cassert>
@@ -187,6 +187,21 @@ void getKeysTest(){
   cout << "getKeysTest: OK" << endl;
 }
 
+void readAndWriteTest(){
+  HashTable<int,int> hashTable = HashTable<int,int>(8);
+  hashTable.singleWrite(1,51);
+  hashTable.singleWrite(2,52);
+  assert(hashTable.readAndWrite(1,60) == 51);
+  assert(hashTable.singleRead(1) == 60);
+  try {
+    hashTable.readAndWrite(7,60);
+    assert(false);
+  }catch(InvalidReadExeption& e){
+    assert(true);
+  }
+  cout << "readAndWriteTest: OK" << endl;
+}
+
 void performance_test1(){
   HashTable<int,int> hashTable = HashTable<int,int>(256);
   srand (time(0));
@@ -284,7 +299,6 @@ void performance_test5(){
 }
 
 int main(){
-
   //test1();
   test2();
   test3();
@@ -297,6 +311,7 @@ int main(){
   isEmptyTest();
   copyTest();
   getKeysTest();
+  readAndWriteTest();
 
   cout << endl;
 

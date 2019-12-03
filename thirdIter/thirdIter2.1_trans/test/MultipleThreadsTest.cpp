@@ -1,4 +1,4 @@
-#include "HashTable.h"
+#include "../src/Table/HashTable.h"
 #include <iostream>
 #include <cassert>
 #include <stdlib.h>
@@ -18,7 +18,7 @@ using std::pair;
   HashTable<int,int> reHashTable = HashTable<int,int>(128);
 
   HashTable<int,int> spamTable = HashTable<int,int>(128);
-
+  
 //---------------------------------HELP_FUNCTIONS----------------------------//
 
 void* write(void *arg){

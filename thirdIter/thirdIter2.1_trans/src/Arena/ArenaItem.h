@@ -2,11 +2,11 @@
 #define ARENAITEM_H
 
 #include <memory>
-#include "HashTable.h"
+#include "../Table/HashTable.h"
 
 template<class Key, class Value>  class ArenaItem {
 private:
-  
+
     HashNode<Key, Value> datum;
     // Points to the next freely available item.
     ArenaItem *next;
