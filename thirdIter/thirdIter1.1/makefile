@@ -21,15 +21,14 @@ LDFLAGS =   -g -pthread
 #CPPFLAGS += -stdlib=libc++
 #CXXFLAGS += -stdlib=libc++
 #LDFLAGS +=  -stdlib=libc++
-HASH_PROGS = HashTable.o HashNode.o  Bucket.o HashTableIterator.o
-HASH_TEST_PROGS = HashTableTest.o HashNode.o  Bucket.o HashTableIterator.o
+
 # Targets
-PROGS = SingleThreadTest MultipleThreadsTest
+PROGS = test/SingleThreadTest test/MultipleThreadsTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
-SingleThreadTest: SingleThreadTest.o $(HASH_PROGS)
-MultipleThreadsTest: MultipleThreadsTest.o $(HASH_PROGS)
+test/SingleThreadTest: test/SingleThreadTest.o 
+test/MultipleThreadsTest: test/MultipleThreadsTest.o
 
 
 # Phony targets
@@ -37,4 +36,4 @@ MultipleThreadsTest: MultipleThreadsTest.o $(HASH_PROGS)
 
 # Standard clean
 clean:
-	rm -f *.o $(PROGS)
+	rm -f test/*.o $(PROGS)

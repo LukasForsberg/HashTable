@@ -1,4 +1,4 @@
-#include "HashTable.h"
+#include "../src/Table/HashTable.h"
 #include <iostream>
 #include <string>
 #include <cassert>
