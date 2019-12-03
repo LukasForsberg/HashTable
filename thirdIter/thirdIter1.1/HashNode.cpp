@@ -16,12 +16,12 @@ HashNode<Key, Value>::HashNode(){
 }
 
 template<class Key, class Value>
-Key& HashNode<Key, Value>::getKey(){
+Key HashNode<Key, Value>::getKey(){
   return key;
 }
 
 template<class Key, class Value>
-Value& HashNode<Key, Value>::getValue(){
+Value HashNode<Key, Value>::getValue(){
   return value;
 }
 
@@ -47,6 +47,6 @@ void HashNode<Key, Value>::setNode(Key key, Value value){
 }
 
 template class HashNode<int,int>;
-template class HashNode<tm_string,int>;
-template class HashNode<int,tm_string>;
-template class HashNode<tm_string,tm_string>;
+template class HashNode<string,int>;
+template class HashNode<int,string>;
+template class HashNode<string,string>;
