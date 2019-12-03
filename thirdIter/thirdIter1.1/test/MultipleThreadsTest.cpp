@@ -24,7 +24,7 @@ using std::pair;
 
 void* write(void *arg){
   for(int j =  0; j < 10; j++){
-    writeTable.singleWrite(j, randTable[j]);
+    writeTable.write(j, randTable[j]);
   }
   return arg;
 }
@@ -32,7 +32,7 @@ void* write(void *arg){
 void* hashWrite(void *arg){
   int index = *((int*)(&arg));
   for(int j =  100*(int )index; j < 100*((int) index+1); j++){
-    reHashTable.singleWrite(j, randTable[j]);
+    reHashTable.write(j, randTable[j]);
   }
   return arg;
 }
@@ -40,7 +40,7 @@ void* hashWrite(void *arg){
 void* spamWrite(void *arg){
   int index = (*(int*)arg);
   for(int i = 0; i < 100; i++){
-    spamTable.singleWrite(4096*( i+ index*100), 4096*( i+ index*100));
+    spamTable.write(4096*( i+ index*100), 4096*( i+ index*100));
   }
   return arg;
 }
@@ -60,7 +60,7 @@ void *megaWrite(void *arg){
     do {
       key = rand();
     }while(data->table->contains(key));
-    data->table->singleWrite(key, value);
+    data->table->write(key, value);
     data->my_map.insert(make_pair(key,value));
   }
   return arg;
@@ -72,7 +72,7 @@ void *megaRead(void *arg){
   for(int i = 0; i < 100; i++){
     key = rand();
     try{
-      table->singleRead(key);
+      table->read(key);
     } catch(InvalidReadExeption& e){}
   }
   return arg;
@@ -96,7 +96,7 @@ void *mapDelete(void *arg){
 void *mapWrite(void *arg){
   mega_data* data = (mega_data*)arg;
   for(auto p : data->my_map){
-    data->table->singleWrite(p.first, p.second);
+    data->table->write(p.first, p.second);
   }
   return arg;
 }
@@ -105,7 +105,7 @@ void *mapRead(void *arg){
   mega_data* data = (mega_data*)arg;
   for(auto p : data->my_map){
     try{
-      data->table->singleRead(p.first);
+      data->table->read(p.first);
     } catch(InvalidReadExeption& e){}
   }
   return arg;
@@ -133,7 +133,7 @@ void writeAndReadTest(){
   }
 
   for( int i = 0; i < 10; i++) {
-    assert(writeTable.singleRead(i) == randTable[i]);
+    assert(writeTable.read(i) == randTable[i]);
   }
   delete [] threads;
   cout << "writeAndReadTest: OK" << endl;
@@ -158,7 +158,7 @@ void reHashTest(){
   }
 
   for( int i = 0; i < no_threads*100; i++) {
-    assert(reHashTable.singleRead(i) == randTable[i]);
+    assert(reHashTable.read(i) == randTable[i]);
   }
   delete [] threads;
   cout << "rehashTest: OK" << endl;
@@ -183,7 +183,7 @@ void spamBucketTest(){
   }
 
   for(int i = 0; i < 100; i++){
-    assert(spamTable.singleRead(i*4096) == i*4096);
+    assert(spamTable.read(i*4096) == i*4096);
   }
   delete [] threads;
   delete [] index;
@@ -216,7 +216,7 @@ void megaSpamTest(){
   for(int i = 0; i < no_write_threads; i++){
     for(auto p : thread_data[i].my_map){
       try{
-        if(table.singleRead(p.first) != p.second){
+        if(table.read(p.first) != p.second){
           count = 0;
           for(int j = 0; j < no_write_threads; j++){
             count = count + thread_data[j].my_map.count(p.first);
@@ -230,7 +230,7 @@ void megaSpamTest(){
         cout << "failed to read key " << p.first << endl;
         assert(false);
       }
-    assert(table.singleRead(p.first) == p.second);
+    assert(table.read(p.first) == p.second);
     OUT_OF_LOOP:;
     }
   }
@@ -287,7 +287,7 @@ void writeReadDeleteTest(){
   for(int i = 0; i < no_write_threads; i++){
     for(auto p : thread_data[i].my_map){
       try{
-        if(table.singleRead(p.first) != p.second){
+        if(table.read(p.first) != p.second){
           count = 0;
           for(int j = 0; j < no_write_threads; j++){
             count = count + thread_data[j].my_map.count(p.first);
@@ -305,7 +305,7 @@ void writeReadDeleteTest(){
           cout << "key " << p.first << " is not in list and was not removed" << endl;
           assert(false);
       }
-      assert(table.singleRead(p.first) == p.second);
+      assert(table.read(p.first) == p.second);
       OUT_OF_LOOP:;
     }
   }

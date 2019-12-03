@@ -145,7 +145,7 @@ template<class Key, class Value> class HashTable {
       }
     }
 
-    void singleWrite(Key key, Value value){
+    void write(Key key, Value value){
       {
         shared_lock<shared_timed_mutex> hash_lock(rehash_mutex);
         auto bucket = &buckets[hash_func(key)];
@@ -183,7 +183,7 @@ template<class Key, class Value> class HashTable {
       }
     }
 
-    Value singleRead(Key key){
+    Value read(Key key){
       shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
       auto bucket = &buckets[hash_func(key)];
       HashNode<Key,Value>* node;

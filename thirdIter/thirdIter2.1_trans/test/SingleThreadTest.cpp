@@ -11,9 +11,9 @@ void test1(){
 
   HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
-  strTable.singleWrite("Edvin", 2);
+  strTable.write("Edvin", 2);
 
-  assert(strTable.singleRead("Edvin") == 2);
+  assert(strTable.read("Edvin") == 2);
   assert(strTable.size() == 1);
 
   cout << "Test 1: OK" << endl;
@@ -28,11 +28,11 @@ void test2(){
   int first_int = intTable.getCapacity();
   int second_int = intTable.getCapacity() * 2;
 
-  intTable.singleWrite(first_int, 13);
-  intTable.singleWrite(second_int, 14);
+  intTable.write(first_int, 13);
+  intTable.write(second_int, 14);
 
-  assert(intTable.singleRead(first_int) == 13);
-  assert(intTable.singleRead(second_int) == 14);
+  assert(intTable.read(first_int) == 13);
+  assert(intTable.read(second_int) == 14);
   assert(intTable.size() == 2);
 
   cout << "Test 2: OK" << endl;
@@ -46,7 +46,7 @@ void test3(){
   srand (time(0));
 
   for(int i = 0; i < 100; i++){
-    hashTable.singleWrite(i, rand() % 100 + 1);
+    hashTable.write(i, rand() % 100 + 1);
   }
   assert(hashTable.getCapacity() == 256);
   assert(hashTable.size() == 100);
@@ -59,14 +59,14 @@ void test4(){
   HashTable<int,int> hashTable = HashTable<int,int>(128);
 
   for(int i = 0; i < 50; i++){
-    hashTable.singleWrite(i, i);
+    hashTable.write(i, i);
   }
   assert(hashTable.getCapacity() == 128);
-  assert(hashTable.singleRead(5) == 5);
+  assert(hashTable.read(5) == 5);
   assert(hashTable.size() == 50);
   hashTable.remove(5);
   try {
-    hashTable.singleRead(5);
+    hashTable.read(5);
     assert(false);
   }catch(InvalidReadExeption& e){
     assert(true);
@@ -80,9 +80,9 @@ void test5(){
   HashTable<int,int> hashTable = HashTable<int,int>(128);
 
   for(int i = 0; i < 50; i++){
-    hashTable.singleWrite(5, i);
+    hashTable.write(5, i);
   }
-  assert(hashTable.singleRead(5) == 49);
+  assert(hashTable.read(5) == 49);
   assert(hashTable.size() == 1);
   cout << "Test 5: OK" << endl;
 }
@@ -92,7 +92,7 @@ void test6(){
   //Test6: hashed to same bucket but have different keys
   HashTable<int,int> hashTable = HashTable<int,int>(8);
   srand (time(0));
-  hashTable.singleWrite(5, 1);
+  hashTable.write(5, 1);
   int index1 = hashTable.hash_func(5);
 
   int index2;
@@ -101,10 +101,10 @@ void test6(){
     b = rand();
     index2 = hashTable.hash_func(b);
   }while(index1 != index2 || b == 5);
-  hashTable.singleWrite(b, 2);
+  hashTable.write(b, 2);
 
-  assert(hashTable.singleRead(5) == 1);
-  assert(hashTable.singleRead(b) == 2);
+  assert(hashTable.read(5) == 1);
+  assert(hashTable.read(b) == 2);
   assert(hashTable.size() == 2);
   cout << "Test 6: OK" << endl;
 }
@@ -113,7 +113,7 @@ void containsTest(){
 
   HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
-  strTable.singleWrite("Edvin", 2);
+  strTable.write("Edvin", 2);
 
   assert(strTable.containsKey("Edvin"));
   assert(strTable.contains(2));
@@ -149,12 +149,12 @@ void copyTest(){
 
   HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
-  strTable.singleWrite("Edvin", 96);
-  strTable.singleWrite("Lukas", 85);
+  strTable.write("Edvin", 96);
+  strTable.write("Lukas", 85);
 
   HashTable<tm_string,int> copyTable = strTable;
 
-  strTable.singleWrite("Pelle", 44);
+  strTable.write("Pelle", 44);
 
   assert(!(copyTable.contains(44)));
   assert(copyTable.contains(96));
@@ -166,12 +166,12 @@ void copyTest(){
 void getKeysTest(){
   HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
-  strTable.singleWrite("Marx",50);
-  strTable.singleWrite("Lenin",50);
-  strTable.singleWrite("Gorbatjov",50);
-  strTable.singleWrite("Smith",51);
-  strTable.singleWrite("Thatcher",49);
-  strTable.singleWrite("Reagan",48);
+  strTable.write("Marx",50);
+  strTable.write("Lenin",50);
+  strTable.write("Gorbatjov",50);
+  strTable.write("Smith",51);
+  strTable.write("Thatcher",49);
+  strTable.write("Reagan",48);
 
   vector<tm_string> commies = strTable.getKeys(50, 5);
   int nbr_of_commies = 0;
@@ -189,10 +189,10 @@ void getKeysTest(){
 
 void readAndWriteTest(){
   HashTable<int,int> hashTable = HashTable<int,int>(8);
-  hashTable.singleWrite(1,51);
-  hashTable.singleWrite(2,52);
+  hashTable.write(1,51);
+  hashTable.write(2,52);
   assert(hashTable.readAndWrite(1,60) == 51);
-  assert(hashTable.singleRead(1) == 60);
+  assert(hashTable.read(1) == 60);
   try {
     hashTable.readAndWrite(7,60);
     assert(false);
@@ -209,10 +209,10 @@ void performance_test1(){
 
   clock_gettime(CLOCK_REALTIME, &start);
   for(int i = 0; i < 100; i++){
-    hashTable.singleWrite(i, i);
+    hashTable.write(i, i);
   }
   for(size_t i = 0; i < 100; i++){
-    hashTable.singleRead(i);
+    hashTable.read(i);
   }
   clock_gettime(CLOCK_REALTIME, &end);
   //double time_spent = (end.tv_sec - start.tv_sec) +
@@ -226,10 +226,10 @@ void performance_test2(){
 
   clock_gettime(CLOCK_REALTIME, &start);
   for(int i = 0; i < 100; i++){
-    hashTable.singleWrite(i, i);
+    hashTable.write(i, i);
   }
   for(size_t i = 0; i < hashTable.size(); i++){
-    hashTable.singleRead(i);
+    hashTable.read(i);
   }
   clock_gettime(CLOCK_REALTIME, &end);
   //double time_spent = (end.tv_sec - start.tv_sec) +
@@ -243,10 +243,10 @@ void performance_test3(){
 
   clock_gettime(CLOCK_REALTIME, &start);
   for(int i = 0; i < 100; i++){
-    hashTable.singleWrite(i, i);
+    hashTable.write(i, i);
   }
   for(size_t i = 0; i < hashTable.size(); i++){
-    hashTable.singleRead(i);
+    hashTable.read(i);
   }
   clock_gettime(CLOCK_REALTIME, &end);
   //double time_spent = (end.tv_sec - start.tv_sec) +
@@ -260,12 +260,12 @@ void performance_test4(){
 
   clock_gettime(CLOCK_REALTIME, &startWrite);
   for(int i = 0; i < 100; i++){
-    hashTable.singleWrite(i, i);
+    hashTable.write(i, i);
   }
   clock_gettime(CLOCK_REALTIME, &endWrite);
   clock_gettime(CLOCK_REALTIME, &startRead);
   for(size_t i = 0; i < hashTable.size(); i++){
-    hashTable.singleRead(i);
+    hashTable.read(i);
   }
   clock_gettime(CLOCK_REALTIME, &endRead);
   //double time_spent = (end.tv_sec - start.tv_sec) +
@@ -283,10 +283,10 @@ void performance_test5(){
   hashTable.memorySum.tv_nsec = 0;
 
   for(int i = 0; i < 1000; i++){
-    hashTable.singleWrite(i, i);
+    hashTable.write(i, i);
   }
   for(size_t i = 0; i < hashTable.size(); i++){
-    hashTable.singleRead(i);
+    hashTable.read(i);
   }
 
   cout << "write: " <<  hashTable.writeSum.tv_nsec << endl;
