@@ -149,13 +149,13 @@ void HashTable<Key, Value>::privateRehash(){
   size_t no_threads;
   size_t chunkSize;
 
-  if(cores < (capacity >> 9)){
+  if(cores < (capacity >> 10)){
     no_threads = cores;
     chunkSize = capacity / cores;
   } else {
-     if(capacity >= 512){
-       chunkSize = 512;
-       no_threads = capacity >> 9;
+     if(capacity >= 1024){
+       chunkSize = 1024;
+       no_threads = capacity >> 10;
      } else {
        chunkSize = capacity;
        no_threads = 1;
@@ -184,7 +184,13 @@ void HashTable<Key, Value>::privateRehash(){
   delete [] helpThreads;
   delete [] args;
   clock_gettime(CLOCK_REALTIME, &hashEnd);
+
+
+
   hashSum.tv_nsec = hashSum.tv_nsec + hashEnd.tv_nsec - hashStart.tv_nsec;
+  hashSum.tv_sec = hashSum.tv_sec + hashEnd.tv_sec - hashStart.tv_sec;
+
+  nanoTotal = hashSum.tv_sec * 1000 + hashSum.tv_nsec / 1000000;
 
 }
 

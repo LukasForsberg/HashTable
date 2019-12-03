@@ -49,6 +49,8 @@ template<class Key, class Value> class HashTable {
         writeStart, writeEnd,writeSum ,funcStart, funcEnd, funcSum,
         rehashStart, rehashEnd, rehashSum, memoryStart, memoryEnd, memorySum,
         hashStart, hashEnd, hashSum;
+
+        uint64_t nanoTotal;
     #endif
 
   private:

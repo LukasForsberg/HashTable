@@ -1,0 +1,39 @@
+
+------TEST_ARGS: Init_size=128, 4 REHASH, NO MEMRY OPTIMNS (didnt matter)-------
+
+NOT MT rehash     (micro sec)  609
+MT rehash (CHUNK SIZE 64)     1427
+MT rehash (CHUNK SIZE 256)    1250
+MT rehash (CHUNK SIZE 512)    1066
+
+conclusion: For small hash maps its no improvement, bigger chunks increase
+performance.
+
+------TEST_ARGS: Init_size= 8192, 1 REHASH, NO MEMRY OPTIMNS (didnt matter)-------
+
+NOT MT rehash                 1862
+MT rehash (CHUNK SIZE 512)    2593
+MT rehash (CHUNK SIZE 1024)   1975
+MT rehash (CHUNK SIZE 4096)   2092
+
+conclusion: fuck
+
+---GRAND_TEST_1-----
+
+writes = 1'000'000
+init_size = 1'048'576
+chunk_size = 1'024
+
+
+NOT MT rehash                 187 ms
+MT rehash                     184 ms
+
+---GRAND_TEST_2-----
+
+writes = 1'000'000
+init_size = 16'777'216
+chunk_size = 1'024
+
+
+NOT MT rehash                 102241 ms
+MT rehash                     62479 ms

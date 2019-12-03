@@ -15,7 +15,7 @@ using std::pair;
 
   HashTable<int,int> writeTable = HashTable<int,int>(128);
 
-  HashTable<int,int> reHashTable = HashTable<int,int>(1048576);
+  HashTable<int,int> reHashTable = HashTable<int,int>(16777216);
 
   HashTable<int,int> spamTable = HashTable<int,int>(256);
 
