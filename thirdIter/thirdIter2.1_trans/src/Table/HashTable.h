@@ -190,7 +190,9 @@ template<class Key, class Value> class HashTable {
 
       atomic_noexcept{
         node = bucket->getNode();
-        while(node != nullptr){
+      }
+      while(node != nullptr){
+        atomic_noexcept{
           if(key == node->getKey()){
             return node->getValue();
             break;
@@ -208,7 +210,9 @@ template<class Key, class Value> class HashTable {
       Value v;
       atomic_noexcept{
         node = bucket->getNode();
-        while(node != nullptr){
+      }
+      while(node != nullptr){
+        atomic_noexcept{
           if(key == node->getKey()){
             v = node->getValue();
             node->setValue(new_val);
@@ -243,7 +247,9 @@ template<class Key, class Value> class HashTable {
       //synchronized {
       atomic_noexcept{
         node = bucket->getNode();
-        while(node != nullptr){
+      }
+      while(node != nullptr){
+        atomic_noexcept{
           if(node->getKey() == key){
             if(prev_node != nullptr){
               prev_node->insertNext(node->getNext());
@@ -257,6 +263,7 @@ template<class Key, class Value> class HashTable {
           node = node->getNext();
         }
       }
+
       if(del_flag){
         load.fetch_sub(1, std::memory_order_relaxed);
         arena->free(node);
@@ -274,7 +281,9 @@ template<class Key, class Value> class HashTable {
         //synchronized {
         atomic_noexcept{
           node = bucket->getNode();
-          while (node != nullptr){
+        }
+        while (node != nullptr){
+          atomic_noexcept{
             if(node->getValue() == value){
               return true;
             }
