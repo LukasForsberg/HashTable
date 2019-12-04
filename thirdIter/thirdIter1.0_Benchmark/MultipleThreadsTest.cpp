@@ -11,11 +11,11 @@
 using std::vector;
 using std::pair;
 
-  int *randTable = new int[10000];
+  int *randTable = new int[1000000];
 
   HashTable<int,int> writeTable = HashTable<int,int>(128);
 
-  HashTable<int,int> reHashTable = HashTable<int,int>(128);
+  HashTable<int,int> reHashTable = HashTable<int,int>(16777216);
 
   HashTable<int,int> spamTable = HashTable<int,int>(256);
 
@@ -31,7 +31,7 @@ void* write(void *arg){
 
 void* hashWrite(void *arg){
   int index = *((int*)(&arg));
-  for(int j =  100*(int )index; j < 100*((int) index+1); j++){
+  for(int j =  1000*(int )index; j < 1000*((int) index+1); j++){
     reHashTable.singleWrite(j, randTable[j]);
   }
   return arg;
@@ -103,44 +103,29 @@ void writeAndReadTest(){
   void reHashTest(){
 
   reHashTable.hashSum.tv_nsec = 0;
-  struct timespec startTest, endTest;
+  reHashTable.hashSum.tv_sec = 0;
+
   srand (time(0));
-  clock_gettime(CLOCK_REALTIME, &startTest);
 
-  cout << "reHashTest: RUNNING..." << endl;
-
-
-  int no_threads = 10;
-
-  pthread_t *threads = new pthread_t[no_threads];
-
-  for( int i = 0; i < no_threads*100; i++ ) {
+  for( int i = 0; i < 1000000; i++ ) {
 
     randTable[i] = rand() % 100;
   }
 
-  for( int i = 0; i < no_threads; i++ ) {
-
-    pthread_create(&threads[i], NULL, &hashWrite,(void*)i);
+  for( int i = 0; i < 1000000; i++ ) {
+    reHashTable.singleWrite(i, randTable[i]);
   }
 
-  for (int i = 0; i < no_threads; i++)
-    {
-       pthread_join (threads[i], NULL);
-    }
+  reHashTable.rehash();
 
-  for( int i = 0; i < no_threads*100; i++) {
+  for( int i = 0; i < 1000000; i++) {
 
     assert(reHashTable.singleRead(i) == randTable[i]);
 
   }
 
-  delete [] threads;
 
-  clock_gettime(CLOCK_REALTIME, &endTest);
-
-  cout << "Total test time:   " << (endTest.tv_nsec - startTest.tv_nsec) << endl;
-  cout << "Rehash time:       " << reHashTable.hashSum.tv_nsec << endl;
+  cout << "Rehash time: "  << reHashTable.nanoTotal << endl;
   cout << "rehashTest: OK" << endl;
 
 }
