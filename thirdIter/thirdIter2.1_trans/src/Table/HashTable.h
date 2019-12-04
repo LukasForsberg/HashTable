@@ -29,7 +29,7 @@ struct arg_struct {
     size_t chunkSize;
 };
 
-#define test (1)
+#define test (0)
 
 template<class Key, class Value> class HashTable {
   friend class HashTableIterator<Key,Value>;
@@ -244,7 +244,6 @@ template<class Key, class Value> class HashTable {
       HashNode<Key,Value>* prev_node = nullptr;
       bool del_flag = false;
 
-      //synchronized {
       atomic_noexcept{
         node = bucket->getNode();
       }
@@ -294,27 +293,26 @@ template<class Key, class Value> class HashTable {
       return false;
     }
 
-    vector<Key> getKeys(const Value value, const int max_keys){
+    vector<Key> getKeys(const Value value){
       shared_lock<shared_timed_mutex> hash_lock(rehash_mutex);
       vector<Key> v;
-      v.resize(max_keys);
-      int count = 0;
+      bool cond;
+      Key key;
       Bucket<Key,Value>* bucket;
       HashNode<Key,Value>* node;
       for(size_t i = 0; i < capacity; i++){
         bucket = &buckets[i];
-        //synchronized {
         atomic_noexcept{
           node = bucket->getNode();
-          while (node != nullptr){
-            if(node->getValue() == value){
-              v[count] = node->getKey();
-              count++;
-              if(count > max_keys){
-                return v;
-              }
-            }
+        }
+        while (node != nullptr){
+          atomic_noexcept{
+            cond = (node->getValue() == value);
+            key =  node->getKey();
             node = node->getNext();
+          }
+          if(cond){
+            v.push_back(key);
           }
         }
       }
@@ -324,10 +322,12 @@ template<class Key, class Value> class HashTable {
     bool containsKey(const Key key){
       shared_lock<std::shared_timed_mutex> hash_lock(rehash_mutex);
       Bucket<Key,Value>* bucket = &buckets[hash_func(key)];
-      //synchronized {
+      HashNode<Key,Value>* node;
       atomic_noexcept{
-        auto node = bucket->getNode();
-        while (node != nullptr){
+        node = bucket->getNode();
+      }
+      while (node != nullptr){
+        atomic_noexcept{
           if(node->getKey() == key){
             return true;
           }

@@ -12,6 +12,7 @@ HashTable<Key, Value>::HashTable(size_t size){
     throw InvalidSizeException();
   }
   buckets = new Bucket<Key,Value>[size];
+//  arena = new Arena(size);
   capacity = size;
   load = 0;
 }
@@ -30,6 +31,7 @@ HashTable<Key, Value>::~HashTable(){
     }
   }
   delete [] buckets;
+  //delete arena;
 }
 
 template<class Key, class Value>

@@ -23,12 +23,13 @@ LDFLAGS =   -g -pthread -fgnu-tm
 #LDFLAGS +=  -stdlib=libc++
 
 # Targets
-PROGS = test/SingleThreadTest test/MultipleThreadsTest
+PROGS = test/SingleThreadTest test/MultipleThreadsTest test/benchMarkTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
 test/SingleThreadTest: test/SingleThreadTest.o
 test/MultipleThreadsTest: test/MultipleThreadsTest.o
+test/benchMarkTest: test/benchMarkTest.o
 
 
 

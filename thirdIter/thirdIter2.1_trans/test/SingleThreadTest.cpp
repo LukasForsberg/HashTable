@@ -173,7 +173,7 @@ void getKeysTest(){
   strTable.write("Thatcher",49);
   strTable.write("Reagan",48);
 
-  vector<tm_string> commies = strTable.getKeys(50, 5);
+  vector<tm_string> commies = strTable.getKeys(50);
   int nbr_of_commies = 0;
   for(size_t i = 0; i <commies.size(); i++){
     if(commies[i] == "Marx" || commies[i] == "Lenin" || commies[i] == "Gorbatjov"){

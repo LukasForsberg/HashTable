@@ -285,7 +285,7 @@ void performance_test5(){
 
 int main(){
 
-  test1();
+  //test1();
   test2();
   test3();
   test4();

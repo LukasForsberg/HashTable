@@ -315,7 +315,7 @@ template<class Key, class Value> class HashTable {
         cout << "index : " << i << endl;
         auto node = buckets[i].getNode();
         while(node != nullptr){
-          cout << "Key: " << node->getKey() << " Value: " << node->getValue() << endl;
+          cout << "/tKey: " << node->getKey() << " Value: " << node->getValue() << endl;
           node = node->getNext();
         }
       }

@@ -18,7 +18,7 @@ using std::pair;
   HashTable<int,int> reHashTable = HashTable<int,int>(128);
 
   HashTable<int,int> spamTable = HashTable<int,int>(128);
-  
+
 //---------------------------------HELP_FUNCTIONS----------------------------//
 
 void* write(void *arg){
@@ -189,8 +189,8 @@ void spamBucketTest(){
   cout << "spamBucketTest: OK" << endl;
 }
 
-void megaSpamTest(){
-  cout << "megaSpamTest: RUNNING..." << endl;
+void randomSpamTest(){
+  cout << "ranomdSpamTest: RUNNING..." << endl;
   int no_threads = 10;
   int no_write_threads = no_threads/2;
   int no_read_threads = no_threads/2;
@@ -322,7 +322,7 @@ int main(){
   writeAndReadTest();
   reHashTest();
   spamBucketTest();
-  megaSpamTest();
+  randomSpamTest();
   writeReadDeleteTest();
   delete [] randTable;
 
