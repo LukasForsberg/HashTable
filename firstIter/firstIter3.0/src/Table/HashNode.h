@@ -3,7 +3,6 @@
 
 #include <memory>
 #include "custom/tm_string.h"
-#include <thread>
 
 template<class Key, class Value> class HashNode{
 
@@ -19,23 +18,23 @@ public:
     next = nullptr;
   }
 
-  Key& getKey() transaction_safe{
+  Key& getKey(){
     return key;
   }
 
-  Value& getValue() transaction_safe{
+  Value& getValue() {
     return value;
   }
 
-  void insertNext(HashNode<Key, Value>* next_node)  transaction_safe{
+  void insertNext(HashNode<Key, Value>* next_node)  {
     next = next_node;
   }
 
-  void setValue(Value value) transaction_safe{
+  void setValue(Value value) {
     this->value = std::move(value);
   }
 
-  HashNode<Key, Value>* getNext()  transaction_safe{
+  HashNode<Key, Value>* getNext()  {
     return next;
   }
 
@@ -44,11 +43,11 @@ public:
     this->value = std::move(value);
   }
 
+private:
+
   HashNode<Key, Value>* next;
   Key key;
   Value value;
-
-
 
 };
 

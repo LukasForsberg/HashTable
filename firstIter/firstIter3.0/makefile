@@ -10,15 +10,12 @@ CC  = $(CXX)
 # Define preprocessor, compiler, and linker flags. Uncomment the # lines
 # if you use clang++ and wish to use libc++ instead of GNU's libstdc++.
 # -g is for debugging.
-CPPFLAGS =  -std=c++17 -I. -pthread -fgnu-tm -c -Wa,-alh
+CPPFLAGS =  -std=c++17 -I. -pthread -fgnu-tm
 CXXFLAGS = -Wall -Wextra -pedantic-errors #-Wold-style-cast
 CXXFLAGS +=  -o3
 CXXFLAGS += -g
 CXXFLAGS += $(DEPFLAGS)
-LDFLAGS =   -g -pthread -fgnu-tm 
-
-#1ca0 <_ITM_beginTransaction@plt>
-
+LDFLAGS =   -g -pthread -fgnu-tm
 
 #LDLIBS = -llab1
 #CPPFLAGS += -stdlib=libc++
@@ -26,12 +23,11 @@ LDFLAGS =   -g -pthread -fgnu-tm
 #LDFLAGS +=  -stdlib=libc++
 
 # Targets
-PROGS = test/SingleThreadTest test/MultipleThreadsTest test/benchMarkTest
+PROGS = test/SingleThreadTest test/benchMarkTest
 all: $(PROGS)
 
 # Targets rely on implicit rules for compiling and linking
 test/SingleThreadTest: test/SingleThreadTest.o
-test/MultipleThreadsTest: test/MultipleThreadsTest.o
 test/benchMarkTest: test/benchMarkTest.o
 
 

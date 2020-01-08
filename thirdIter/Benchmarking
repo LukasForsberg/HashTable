@@ -37,3 +37,68 @@ chunk_size = 1'024
 
 NOT MT rehash                 102241 ms
 MT rehash                     62479 ms
+
+
+
+
+------TEST_COMP: Init_size= 128, TM, LOCK AND SINGLE BIG SHOWDOWN-------
+
+WRITES ONE THREAD: LOAD = 10000 , RUNS = 4000
+  SINGLE : 5278 microseconds
+  LOCK : 12319 microseconds
+  TM : 10949 microseconds
+
+READ ONE THREAD:
+
+------TEST_COMP: Init_size= 5000, TM, LOCK AND SINGLE BIG SHOWDOWN-------
+
+--------------- Lukas computer -------------
+100 runs
+work 1,000,000 10% writes 80% reads 10% deletes
+
+TM:
+  NBR OF THREADS :    TIME
+        1            316736 (100)
+        2            330096
+        3            415064
+        4            527559
+        6
+
+
+
+LOCK:
+  NBR OF THREADS :    TIME
+        1            342154 (100)
+        2            331678 (100)
+        3            447942
+        4            795991
+        6            856159
+        8            998575
+        16
+--------------- Lukas computer -------------
+
+------------ POWER8 -------------
+100 runs
+work 1,000,000 10% writes 80% reads 10% deletes
+
+TM:
+  NBR OF THREADS :    TIME
+        1             419477
+        2             304704
+        3             263078
+        4             283234
+        6             299250
+        8             308995
+
+
+
+LOCK:
+  NBR OF THREADS :    TIME
+        1            419349 (100)
+        2            299669
+        3            295192
+        4            293762
+        6            317749
+        8            416372
+
+------------ POWER8 -------------

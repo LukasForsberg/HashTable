@@ -237,10 +237,10 @@ uint64_t singlePurposeThreadTest(){
 }
 
 
-int64_t multiPurposeThreadTest(int no_threads, uint64_t load){
+int64_t multiPurposeThreadTest(int no_threads){
   //cout << "Benchmark test for TM: RUNNING..." << endl;
 
-  int thread_load = load/no_threads; // workload for thread, read is multiplied by 8
+  int thread_load = 100000/no_threads; // workload for thread, read is multiplied by 8
   int start_up_load = 200000; // inital load in hashtable
   int start_size = 524288;
   int i;
@@ -351,9 +351,12 @@ int64_t multiPurposeThreadTest(int no_threads, uint64_t load){
   return ret_sum;
 }
 
-void nbr_of_thread_comp(){
-  //vector<int> v = {1,2,3,4,6,8,16};
-  vector<int> v = {8,16};
+
+
+int main(){
+  //int no_threads = 1;
+  cout << "Benchmark test for " << " Single Thread: RUNNING..." << endl;
+  vector<int> v = {1};
   int64_t sum = 0;
   int64_t temp;
   int64_t runs = 200;
@@ -363,7 +366,7 @@ void nbr_of_thread_comp(){
     cout << no_threads  << " threads "<< endl;
     for(int i = 0; i < runs; i++){
       //temp = singlePurposeThreadTest();
-      temp = multiPurposeThreadTest(no_threads,100000);
+      temp = multiPurposeThreadTest(no_threads);
       if(temp > 84467440737090352 || temp < 0){
         i--;
       } else {
@@ -374,38 +377,6 @@ void nbr_of_thread_comp(){
     cout << "AVG :" << sum/runs << endl;
     cout << endl;
   }
-}
-
-void load_comp(){
-  //vector<int> v = {1,2,3,4,6,8,16};
-  vector<uint64_t> v = {100000,200000,400000,800000};
-  int64_t sum = 0;
-  int64_t temp;
-  int64_t runs = 200;
-
-  for(int load : v){
-    sum = 0;
-    cout << load  << " Load "<< endl;
-    for(int i = 0; i < runs; i++){
-      //temp = singlePurposeThreadTest();
-      temp = multiPurposeThreadTest(8,load);
-      if(temp > 84467440737090352 || temp < 0){
-        i--;
-      } else {
-        sum = sum + temp;
-      }
-      //cout << i << endl;
-    }
-    cout << "AVG :" << sum/runs << endl;
-    cout << endl;
-  }
-}
-
-int main(){
-  //int no_threads = 1;
-  cout << "Benchmark test for " << " TM: RUNNING..." << endl;
-  load_comp();
-
 
   return 0;
 }

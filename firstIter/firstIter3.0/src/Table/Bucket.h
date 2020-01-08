@@ -1,7 +1,6 @@
 #ifndef BUCKET_H
 #define BUCKET_T
 
-#include <mutex>
 #include <shared_mutex>
 #include <string>
 #include "HashNode.h"
@@ -13,7 +12,7 @@ public:
   void setNode(HashNode<Key,Value>* newNode){ node = newNode; }
   HashNode<Key,Value>* getNode(){ return node; }
   bool empty(){ return node == nullptr; };
-  void append(HashNode<Key, Value>* new_node) transaction_safe{
+  void append(HashNode<Key, Value>* new_node){
     new_node->insertNext(node);
     node = new_node;
   }
@@ -34,8 +33,9 @@ public:
      return *this;
   }
 
+
+private:
   HashNode<Key,Value>* node;
 };
-
 
 #endif

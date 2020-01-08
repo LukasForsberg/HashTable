@@ -9,12 +9,12 @@ void test1(){
   //----------------------------------------------------------------------------
   //Test 1: Simple write->read.
 
-  HashTable<int,int> strTable = HashTable<int,int>(128);
+  HashTable<tm_string,int> strTable = HashTable<tm_string,int>(128);
 
-  strTable.write(5, 2);
+  strTable.write("Edvin", 2);
 
-  //assert(strTable.read(5) == 2);
-  //assert(strTable.size() == 1);
+  assert(strTable.read("Edvin") == 2);
+  assert(strTable.size() == 1);
 
   cout << "Test 1: OK" << endl;
 }
@@ -299,8 +299,8 @@ void performance_test5(){
 }
 
 int main(){
-  test1();
-  /*test2();
+  //test1();
+  test2();
   test3();
   test4();
   test5();
@@ -322,6 +322,5 @@ int main(){
   #if test
     performance_test5();
   #endif
-  */
 
 }

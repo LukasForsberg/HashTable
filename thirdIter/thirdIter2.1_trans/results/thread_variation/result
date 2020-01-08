@@ -1,0 +1,20 @@
+Benchmark test for  TM: RUNNING...
+1 threads 
+AVG :831798
+
+2 threads 
+AVG :639659
+
+3 threads 
+AVG :543506
+
+4 threads 
+AVG :496861
+
+6 threads 
+AVG :678816
+
+8 threads 
+AVG :186525
+
+16 threads 

@@ -1,0 +1,11 @@
+Benchmark test for  TM: RUNNING...
+100000 Load 
+AVG :170071
+
+200000 Load 
+AVG :381732
+
+400000 Load 
+AVG :3376943
+
+800000 Load 

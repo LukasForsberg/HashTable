@@ -1,0 +1,22 @@
+Benchmark test for  LOCK: RUNNING...
+1 threads 
+AVG :501019
+
+2 threads 
+AVG :334728
+
+3 threads 
+AVG :277076
+
+4 threads 
+AVG :271972
+
+6 threads 
+AVG :266391
+
+8 threads 
+AVG :259738
+
+16 threads 
+AVG :253789
+
